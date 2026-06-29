@@ -1,0 +1,22 @@
+{
+  "server": {
+    "host": "0.0.0.0",
+    "httpPort": 3010,
+    "ircPort": 6667
+  },
+  "platforms": {
+    "douyu": {
+      "enabled": true,
+      "roomId": "10942092",
+      "includeGifts": false
+    },
+    "huya": {
+      "enabled": false,
+      "roomId": ""
+    }
+  },
+  "output": {
+    "format": "[{platform}] {username}: {content}",
+    "queueIntervalMs": 300
+  }
+}

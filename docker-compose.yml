@@ -1,0 +1,12 @@
+services:
+  gamelivecomment:
+    build: .
+    container_name: gamelivecomment
+    restart: unless-stopped
+    ports:
+      - "3010:3010"
+      - "6667:6667"
+    volumes:
+      - ./config.json:/app/config.json:ro
+    environment:
+      NODE_ENV: production
