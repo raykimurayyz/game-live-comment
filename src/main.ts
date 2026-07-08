@@ -68,12 +68,27 @@ async function bootstrap(): Promise<void> {
   });
   await httpServer.start();
 
-  if (config.platforms.douyu.enabled) {
+  const douyuConfigured = config.platforms.douyu.enabled && config.platforms.douyu.roomId.trim().length > 0;
+  const huyaConfigured = config.platforms.huya.enabled && config.platforms.huya.roomId.trim().length > 0;
+
+  if (douyuConfigured) {
     await douyuAdapter.connect();
+  } else if (config.platforms.douyu.enabled) {
+    logger.error('douyu adapter enabled but DOUYU_ROOM_ID/platforms.douyu.roomId is not configured');
+  } else {
+    logger.info({ roomId: config.platforms.douyu.roomId }, 'douyu adapter disabled');
   }
 
-  if (config.platforms.huya.enabled) {
+  if (huyaConfigured) {
     await huyaAdapter.connect();
+  } else if (config.platforms.huya.enabled) {
+    logger.error('huya adapter enabled but HUYA_ROOM_ID/platforms.huya.roomId is not configured');
+  } else {
+    logger.info({ roomId: config.platforms.huya.roomId }, 'huya adapter disabled');
+  }
+
+  if (!douyuConfigured && !huyaConfigured) {
+    logger.error('no streaming platform room configured; platform adapters will not receive comments');
   }
 
   const shutdown = async (): Promise<void> => {

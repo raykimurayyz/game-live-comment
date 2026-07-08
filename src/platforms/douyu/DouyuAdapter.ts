@@ -29,9 +29,21 @@ export class DouyuAdapter implements PlatformAdapter {
   constructor(private options: DouyuAdapterOptions) {}
 
   async connect(): Promise<void> {
+    const roomId = this.options.roomId.trim();
+    if (!roomId) {
+      this.failStartup('douyu room id is not configured');
+      return;
+    }
+
     this.stopped = false;
     this.status = 'connecting';
     this.clearReconnectTimer();
+
+    const roomExists = await this.checkRoomExists(roomId);
+    if (!roomExists) {
+      this.failStartup(`douyu room does not exist or is unavailable: ${roomId}`);
+      return;
+    }
 
     await this.openWebSocket();
   }
@@ -190,5 +202,40 @@ export class DouyuAdapter implements PlatformAdapter {
       clearTimeout(this.reconnectTimer);
       this.reconnectTimer = undefined;
     }
+  }
+
+  private async checkRoomExists(roomId: string): Promise<boolean> {
+    try {
+      const response = await fetch(`https://open.douyucdn.cn/api/RoomApi/room/${encodeURIComponent(roomId)}`);
+      if (!response.ok) {
+        logger.warn({ roomId, status: response.status }, 'douyu room preflight request failed, continuing');
+        return true;
+      }
+
+      const payload = (await response.json()) as {
+        error?: number;
+        msg?: string;
+        data?: {
+          room_id?: number | string;
+        };
+      };
+
+      if (payload.error === 0 && payload.data?.room_id) {
+        return true;
+      }
+
+      this.lastError = payload.msg || `douyu room not found: ${roomId}`;
+      return false;
+    } catch (error) {
+      logger.warn({ error, roomId }, 'douyu room preflight request failed, continuing');
+      return true;
+    }
+  }
+
+  private failStartup(message: string): void {
+    this.status = 'error';
+    this.lastError = message;
+    this.stopped = true;
+    logger.error({ roomId: this.options.roomId }, message);
   }
 }
