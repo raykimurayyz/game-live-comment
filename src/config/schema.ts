@@ -15,6 +15,7 @@ export const appConfigSchema = z.object({
     huya: z.object({
       enabled: z.boolean().default(false),
       roomId: z.string().default(''),
+      includeGifts: z.boolean().default(false),
     }),
   }),
   output: z.object({

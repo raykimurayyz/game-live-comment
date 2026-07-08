@@ -12,7 +12,8 @@
     },
     "huya": {
       "enabled": false,
-      "roomId": ""
+      "roomId": "27367112",
+      "includeGifts": false
     }
   },
   "output": {

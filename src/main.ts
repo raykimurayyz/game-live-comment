@@ -3,6 +3,7 @@ import { CommentBus } from './core/CommentBus.js';
 import type { LiveComment } from './core/LiveComment.js';
 import { TwitchIrcOutput } from './output/TwitchIrcOutput.js';
 import { DouyuAdapter } from './platforms/douyu/DouyuAdapter.js';
+import { HuyaAdapter } from './platforms/huya/HuyaAdapter.js';
 import { TwitchIrcServer } from './twitch/TwitchIrcServer.js';
 import { logger } from './utils/logger.js';
 import { HttpServer } from './web/httpServer.js';
@@ -28,6 +29,12 @@ async function bootstrap(): Promise<void> {
   });
   douyuAdapter.onComment((comment) => bus.publish(comment));
 
+  const huyaAdapter = new HuyaAdapter({
+    roomId: config.platforms.huya.roomId,
+    includeGifts: config.platforms.huya.includeGifts,
+  });
+  huyaAdapter.onComment((comment) => bus.publish(comment));
+
   let httpServer: HttpServer;
   httpServer = new HttpServer({
     host: config.server.host,
@@ -39,11 +46,13 @@ async function bootstrap(): Promise<void> {
       web: httpServer.getStatus(),
       platforms: {
         douyu: douyuAdapter.getStatus(),
-        huya: {
-          name: 'huya',
-          status: config.platforms.huya.enabled ? 'pending' : 'disabled',
-          roomId: config.platforms.huya.roomId,
-        },
+        huya: config.platforms.huya.enabled || huyaAdapter.getStatus().status !== 'idle'
+          ? huyaAdapter.getStatus()
+          : {
+              name: 'huya',
+              status: 'disabled',
+              roomId: config.platforms.huya.roomId,
+            },
       },
       comments: bus.getStats(),
     }),
@@ -53,6 +62,9 @@ async function bootstrap(): Promise<void> {
     switchDouyuRoom: async (roomId) => {
       await douyuAdapter.switchRoom(roomId);
     },
+    switchHuyaRoom: async (roomId) => {
+      await huyaAdapter.switchRoom(roomId);
+    },
   });
   await httpServer.start();
 
@@ -60,10 +72,15 @@ async function bootstrap(): Promise<void> {
     await douyuAdapter.connect();
   }
 
+  if (config.platforms.huya.enabled) {
+    await huyaAdapter.connect();
+  }
+
   const shutdown = async (): Promise<void> => {
     logger.info('shutting down');
     twitchOutput.stop();
     await douyuAdapter.disconnect();
+    await huyaAdapter.disconnect();
     await httpServer.stop();
     await twitchServer.stop();
     process.exit(0);

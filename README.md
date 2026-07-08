@@ -5,6 +5,7 @@ Forward live comments from Chinese streaming platforms to a PS5 Twitch chat over
 First version:
 
 - Douyu single-room adapter
+- Huya single-room adapter
 - Twitch IRC/TMI emulator on port `6667`
 - Web overlay at `/overlay`
 - Status API at `/api/status`
@@ -38,6 +39,14 @@ curl -X POST http://127.0.0.1:3010/api/platforms/douyu/room \
   -d '{"roomId":"10942092"}'
 ```
 
+Switch Huya room:
+
+```bash
+curl -X POST http://127.0.0.1:3010/api/platforms/huya/room \
+  -H 'content-type: application/json' \
+  -d '{"roomId":"kaerlol"}'
+```
+
 ## Docker
 
 ```bash
@@ -57,6 +66,32 @@ Edit `config.json` before starting the container.
 - `GET /api/status`: service, platform, queue, and recent comment status
 - `POST /api/test-comment`: publish a local test comment
 - `POST /api/platforms/douyu/room`: switch Douyu room and reconnect
+- `POST /api/platforms/huya/room`: switch Huya room and reconnect
+
+## PS5 Interaction Self Check
+
+Automated checks cover the local Twitch IRC/TMI behavior that PS5 depends on:
+
+- `CAP REQ` returns Twitch capability ACK
+- `NICK` returns IRC welcome handshake
+- `JOIN` returns join and names responses
+- `PING` returns `PONG`
+- comments are formatted as Twitch `PRIVMSG`
+- `CommentBus` queues comments before broadcasting to IRC clients
+
+Run:
+
+```bash
+npm run test
+```
+
+This cannot prove DNS redirection or the real PS5 screen overlay. Those still require a PS5 smoke test:
+
+1. Redirect `irc.twitch.tv` and `tmi.twitch.tv` to this service.
+2. Start the app.
+3. Open PS5 Twitch broadcast UI.
+4. Call `POST /api/test-comment`.
+5. Confirm the comment appears on the PS5 overlay.
 
 ## PS5 DNS Redirect
 

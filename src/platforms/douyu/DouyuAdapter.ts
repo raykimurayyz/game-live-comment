@@ -89,7 +89,16 @@ export class DouyuAdapter implements PlatformAdapter {
 
       ws.on('message', (data) => {
         const buffer = Buffer.isBuffer(data) ? data : Buffer.from(data as ArrayBuffer);
-        this.handleMessages(decodeDouyuPackets(buffer));
+        const messages = decodeDouyuPackets(buffer);
+        logger.debug(
+          {
+            bytes: buffer.length,
+            messageCount: messages.length,
+            messageTypes: messages.map((message) => message.type).slice(0, 10),
+          },
+          'received douyu packet',
+        );
+        this.handleMessages(messages);
       });
 
       ws.on('close', () => {
@@ -140,6 +149,16 @@ export class DouyuAdapter implements PlatformAdapter {
     if (!comment.content) {
       return;
     }
+    logger.info(
+      {
+        platform: comment.platform,
+        roomId: comment.roomId,
+        username: comment.username,
+        type: comment.type,
+        content: comment.content,
+      },
+      'received live comment',
+    );
     this.emitter.emit('comment', comment);
   }
 
