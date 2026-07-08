@@ -21,12 +21,24 @@ export class HuyaAdapter implements PlatformAdapter {
   constructor(private options: HuyaAdapterOptions) {}
 
   async connect(): Promise<void> {
+    const roomId = this.options.roomId.trim();
+    if (!roomId) {
+      this.failStartup('huya room id is not configured');
+      return;
+    }
+
     this.stopped = false;
     this.status = 'connecting';
     this.clearReconnectTimer();
 
+    const roomInfo = await this.resolveRoomInfo(roomId);
+    if (!roomInfo) {
+      this.failStartup(`huya room does not exist or is unavailable: ${roomId}`);
+      return;
+    }
+
     const client = new HuyaDanmu(this.options.roomId);
-    this.patchChatInfoResolver(client);
+    this.patchChatInfoResolver(client, roomInfo);
     this.client = client;
 
     client.on('connect', () => {
@@ -140,54 +152,76 @@ export class HuyaAdapter implements PlatformAdapter {
     }
   }
 
-  private patchChatInfoResolver(client: HuyaDanmu): void {
+  private patchChatInfoResolver(
+    client: HuyaDanmu,
+    roomInfo: { subsid: number; topsid: number; yyuid: number },
+  ): void {
     const unsafeClient = client as unknown as {
       _roomid: string;
       _get_chat_info: () => Promise<{ subsid: number; topsid: number; yyuid: number } | undefined>;
     };
 
     unsafeClient._get_chat_info = async () => {
-      try {
-        const response = await fetch(`https://m.huya.com/${unsafeClient._roomid}`, {
-          headers: {
-            'User-Agent':
-              'Mozilla/5.0 (Linux; Android 5.1.1; Nexus 6 Build/LYZ28E) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Mobile Safari/537.36',
-          },
-        });
-        const html = await response.text();
-        const globalInitMatch = html.match(/window\.HNF_GLOBAL_INIT\s?=\s?(.+?)<\/script>/);
+      void unsafeClient._roomid;
+      return roomInfo;
+    };
+  }
 
-        if (globalInitMatch?.[1]) {
-          const globalInit = JSON.parse(globalInitMatch[1]);
-          const yyuid = Number(globalInit?.roomProfile?.lUid);
-          if (Number.isFinite(yyuid) && yyuid > 0) {
-            return {
-              subsid: 0,
-              topsid: 0,
-              yyuid,
-            };
-          }
-        }
+  private async resolveRoomInfo(roomId: string): Promise<{ subsid: number; topsid: number; yyuid: number } | undefined> {
+    try {
+      const response = await fetch(`https://m.huya.com/${roomId}`, {
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (Linux; Android 5.1.1; Nexus 6 Build/LYZ28E) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Mobile Safari/537.36',
+        },
+      });
 
-        const yyuidMatch = html.match(/ayyuid:\s*['"](\d+)['"]/);
-        const topsidMatch = html.match(/var TOPSID = ['"](\d*)['"]/);
-        const subsidMatch = html.match(/var SUBSID = ['"](\d*)['"]/);
-        const yyuid = yyuidMatch?.[1] ? Number(yyuidMatch[1]) : Number.NaN;
+      if (!response.ok) {
+        this.lastError = `huya room page returned ${response.status}`;
+        return undefined;
+      }
+
+      const html = await response.text();
+      const globalInitMatch = html.match(/window\.HNF_GLOBAL_INIT\s?=\s?(.+?)<\/script>/);
+
+      if (globalInitMatch?.[1]) {
+        const globalInit = JSON.parse(globalInitMatch[1]);
+        const yyuid = Number(globalInit?.roomProfile?.lUid);
         if (Number.isFinite(yyuid) && yyuid > 0) {
           return {
-            subsid: subsidMatch?.[1] ? Number(subsidMatch[1]) : 0,
-            topsid: topsidMatch?.[1] ? Number(topsidMatch[1]) : 0,
+            subsid: 0,
+            topsid: 0,
             yyuid,
           };
         }
-
-        throw new Error('failed to parse huya room info');
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        this.lastError = message;
-        logger.warn({ error, roomId: this.options.roomId }, 'failed to resolve huya room info');
-        return undefined;
       }
-    };
+
+      const yyuidMatch = html.match(/ayyuid:\s*['"](\d+)['"]/);
+      const topsidMatch = html.match(/var TOPSID = ['"](\d*)['"]/);
+      const subsidMatch = html.match(/var SUBSID = ['"](\d*)['"]/);
+      const yyuid = yyuidMatch?.[1] ? Number(yyuidMatch[1]) : Number.NaN;
+      if (Number.isFinite(yyuid) && yyuid > 0) {
+        return {
+          subsid: subsidMatch?.[1] ? Number(subsidMatch[1]) : 0,
+          topsid: topsidMatch?.[1] ? Number(topsidMatch[1]) : 0,
+          yyuid,
+        };
+      }
+
+      this.lastError = `failed to parse huya room info: ${roomId}`;
+      return undefined;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.lastError = message;
+      logger.warn({ error, roomId }, 'failed to resolve huya room info');
+      return undefined;
+    }
+  }
+
+  private failStartup(message: string): void {
+    this.status = 'error';
+    this.lastError = message;
+    this.stopped = true;
+    logger.error({ roomId: this.options.roomId }, message);
   }
 }

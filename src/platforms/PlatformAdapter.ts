@@ -1,6 +1,6 @@
 import type { LiveComment } from '../core/LiveComment.js';
 
-export type PlatformStatus = 'idle' | 'connecting' | 'connected' | 'disconnected' | 'error';
+export type PlatformStatus = 'idle' | 'connecting' | 'connected' | 'disconnected' | 'disabled' | 'error';
 
 export interface PlatformAdapter {
   readonly name: string;

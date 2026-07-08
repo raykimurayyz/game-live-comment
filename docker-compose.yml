@@ -10,3 +10,7 @@ services:
       - ./config.json:/app/config.json:ro
     environment:
       NODE_ENV: production
+      DOUYU_ROOM_ID: ""
+      DOUYU_INCLUDE_GIFTS: "false"
+      HUYA_ROOM_ID: ""
+      HUYA_INCLUDE_GIFTS: "false"

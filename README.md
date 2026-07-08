@@ -1,6 +1,8 @@
 # Game Live Comment
 
-Forward live comments from Chinese streaming platforms to a PS5 Twitch chat overlay and a local web overlay.
+[中文说明](README-CN.md)
+
+Forward live comments from specified streaming platforms to a PS5 Twitch chat overlay and a local web overlay.
 
 First version:
 
@@ -58,7 +60,33 @@ Ports:
 - `3010/tcp`: HTTP API and web overlay
 - `6667/tcp`: Twitch IRC/TMI emulator for PS5
 
-Edit `config.json` before starting the container.
+You can either edit `config.json` or override values with environment variables. Environment variables take precedence over `config.json`.
+
+Example:
+
+```bash
+DOUYU_ROOM_ID=10942092 \
+HUYA_ROOM_ID=27367112 \
+docker compose up -d --build
+```
+
+Supported environment variables:
+
+| Variable | Meaning |
+| --- | --- |
+| `SERVER_HOST` | HTTP and IRC bind host |
+| `HTTP_PORT` | HTTP API and overlay port |
+| `IRC_PORT` | Twitch IRC emulator port |
+| `DOUYU_ENABLED` | Optional force switch. `false` disables Douyu even when `DOUYU_ROOM_ID` is set. |
+| `DOUYU_ROOM_ID` | Douyu room ID |
+| `DOUYU_INCLUDE_GIFTS` | Include Douyu gifts |
+| `HUYA_ENABLED` | Optional force switch. `false` disables Huya even when `HUYA_ROOM_ID` is set. |
+| `HUYA_ROOM_ID` | Huya room ID |
+| `HUYA_INCLUDE_GIFTS` | Include Huya gifts |
+| `OUTPUT_FORMAT` | PS5 message format |
+| `QUEUE_INTERVAL_MS` | PS5 IRC output interval |
+
+Setting `DOUYU_ROOM_ID` or `HUYA_ROOM_ID` automatically enables that platform. Use `DOUYU_ENABLED=false` or `HUYA_ENABLED=false` only when you want to force-disable a configured platform. If a configured room cannot be resolved, that platform enters `error` status and will not keep reconnecting.
 
 ## API
 

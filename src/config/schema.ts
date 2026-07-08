@@ -9,7 +9,7 @@ export const appConfigSchema = z.object({
   platforms: z.object({
     douyu: z.object({
       enabled: z.boolean().default(true),
-      roomId: z.string().min(1),
+      roomId: z.string().default(''),
       includeGifts: z.boolean().default(false),
     }),
     huya: z.object({
