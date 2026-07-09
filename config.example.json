@@ -14,6 +14,11 @@
       "enabled": false,
       "roomId": "",
       "includeGifts": false
+    },
+    "bilibili": {
+      "enabled": false,
+      "roomId": "",
+      "includeGifts": false
     }
   },
   "output": {

@@ -10,12 +10,59 @@ on:
       - "v*"
 
 permissions:
-  contents: read
+  contents: write
 
 env:
   IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/gamelivecomment
 
 jobs:
+  release:
+    name: Build GitHub release
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Package release files
+        run: |
+          mkdir -p release/gamelivecomment
+          cp -r dist package.json package-lock.json config.example.json README.md README-CN.md release/gamelivecomment/
+          tar -czf gamelivecomment-${GITHUB_REF_NAME}.tar.gz -C release gamelivecomment
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: gamelivecomment-${{ github.ref_name }}.tar.gz
+          generate_release_notes: true
+          body: |
+            Docker image:
+
+            `${{ env.IMAGE_NAME }}:${{ github.ref_name }}`
+
+            Node.js package:
+
+            Download `gamelivecomment-${{ github.ref_name }}.tar.gz`, extract it, run `npm ci --omit=dev`, copy `config.example.json` to `config.json`, then run `npm start`.
+
   docker:
     name: Build and push Docker image
     runs-on: ubuntu-latest
@@ -40,9 +87,7 @@ jobs:
           images: ${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
-            type=ref,event=branch
             type=ref,event=tag
-            type=sha,prefix=sha-
 
       - name: Build and push
         uses: docker/build-push-action@v6
@@ -53,3 +98,15 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Prepare Docker Hub README
+        run: sed "s#__IMAGE_NAME__#${IMAGE_NAME}#g" DOCKERHUB_README.md > .dockerhub-readme.md
+
+      - name: Update Docker Hub description
+        uses: peter-evans/dockerhub-description@v5
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: ${{ env.IMAGE_NAME }}
+          readme-filepath: .dockerhub-readme.md
+          short-description: Forward live comments from streaming platforms to a PS5 Twitch chat overlay.

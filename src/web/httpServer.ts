@@ -14,6 +14,7 @@ type HttpServerOptions = {
   publishTestComment: (comment?: Partial<LiveComment>) => void;
   switchDouyuRoom: (roomId: string) => Promise<void>;
   switchHuyaRoom: (roomId: string) => Promise<void>;
+  switchBilibiliRoom: (roomId: string) => Promise<void>;
 };
 
 const testCommentSchema = z
@@ -83,6 +84,12 @@ export class HttpServer {
     this.app.post('/api/platforms/huya/room', async (request) => {
       const input = switchRoomSchema.parse(request.body);
       await this.options.switchHuyaRoom(input.roomId);
+      return { ok: true, roomId: input.roomId };
+    });
+
+    this.app.post('/api/platforms/bilibili/room', async (request) => {
+      const input = switchRoomSchema.parse(request.body);
+      await this.options.switchBilibiliRoom(input.roomId);
       return { ok: true, roomId: input.roomId };
     });
 

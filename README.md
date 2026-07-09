@@ -8,6 +8,7 @@ First version:
 
 - Douyu single-room adapter
 - Huya single-room adapter
+- Bilibili single-room adapter without login
 - Twitch IRC/TMI emulator on port `6667`
 - Web overlay at `/overlay`
 - Status API at `/api/status`
@@ -49,7 +50,34 @@ curl -X POST http://127.0.0.1:3010/api/platforms/huya/room \
   -d '{"roomId":"kaerlol"}'
 ```
 
+Switch Bilibili room:
+
+```bash
+curl -X POST http://127.0.0.1:3010/api/platforms/bilibili/room \
+  -H 'content-type: application/json' \
+  -d '{"roomId":"6"}'
+```
+
 ## Docker
+
+Use the published image:
+
+```bash
+docker run -d \
+  --name gamelivecomment \
+  --restart unless-stopped \
+  -p 3010:3010 \
+  -p 6667:6667 \
+  -e DOUYU_ROOM_ID=10942092 \
+  -e DOUYU_INCLUDE_GIFTS=false \
+  -e HUYA_ROOM_ID=27367112 \
+  -e HUYA_INCLUDE_GIFTS=false \
+  -e BILIBILI_ROOM_ID=6 \
+  -e BILIBILI_INCLUDE_GIFTS=false \
+  your-dockerhub-username/gamelivecomment:latest
+```
+
+Or build locally with Docker Compose:
 
 ```bash
 docker compose up -d --build
@@ -62,11 +90,12 @@ Ports:
 
 You can either edit `config.json` or override values with environment variables. Environment variables take precedence over `config.json`.
 
-Example:
+Docker Compose example:
 
 ```bash
 DOUYU_ROOM_ID=10942092 \
 HUYA_ROOM_ID=27367112 \
+BILIBILI_ROOM_ID=6 \
 docker compose up -d --build
 ```
 
@@ -83,10 +112,13 @@ Supported environment variables:
 | `HUYA_ENABLED` | Optional force switch. `false` disables Huya even when `HUYA_ROOM_ID` is set. |
 | `HUYA_ROOM_ID` | Huya room ID |
 | `HUYA_INCLUDE_GIFTS` | Include Huya gifts |
+| `BILIBILI_ENABLED` | Optional force switch. `false` disables Bilibili even when `BILIBILI_ROOM_ID` is set. |
+| `BILIBILI_ROOM_ID` | Bilibili room ID |
+| `BILIBILI_INCLUDE_GIFTS` | Include Bilibili gifts |
 | `OUTPUT_FORMAT` | PS5 message format |
 | `QUEUE_INTERVAL_MS` | PS5 IRC output interval |
 
-Setting `DOUYU_ROOM_ID` or `HUYA_ROOM_ID` automatically enables that platform. Use `DOUYU_ENABLED=false` or `HUYA_ENABLED=false` only when you want to force-disable a configured platform. If a configured room cannot be resolved, that platform enters `error` status and will not keep reconnecting.
+Setting `DOUYU_ROOM_ID`, `HUYA_ROOM_ID`, or `BILIBILI_ROOM_ID` automatically enables that platform. Use `*_ENABLED=false` only when you want to force-disable a configured platform. If a configured room cannot be resolved, that platform enters `error` status and will not keep reconnecting.
 
 ## API
 
@@ -95,6 +127,7 @@ Setting `DOUYU_ROOM_ID` or `HUYA_ROOM_ID` automatically enables that platform. U
 - `POST /api/test-comment`: publish a local test comment
 - `POST /api/platforms/douyu/room`: switch Douyu room and reconnect
 - `POST /api/platforms/huya/room`: switch Huya room and reconnect
+- `POST /api/platforms/bilibili/room`: switch Bilibili room and reconnect
 
 ## PS5 Interaction Self Check
 

@@ -17,6 +17,11 @@ export const appConfigSchema = z.object({
       roomId: z.string().default(''),
       includeGifts: z.boolean().default(false),
     }),
+    bilibili: z.object({
+      enabled: z.boolean().default(false),
+      roomId: z.string().default(''),
+      includeGifts: z.boolean().default(false),
+    }),
   }),
   output: z.object({
     format: z.string().default('[{platform}] {username}: {content}'),

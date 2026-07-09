@@ -14,6 +14,9 @@ const envKeys = [
   'HUYA_ENABLED',
   'HUYA_ROOM_ID',
   'HUYA_INCLUDE_GIFTS',
+  'BILIBILI_ENABLED',
+  'BILIBILI_ROOM_ID',
+  'BILIBILI_INCLUDE_GIFTS',
   'OUTPUT_FORMAT',
   'QUEUE_INTERVAL_MS',
 ] as const;
@@ -47,6 +50,11 @@ describe('loadConfig', () => {
             roomId: 'old-huya',
             includeGifts: false,
           },
+          bilibili: {
+            enabled: false,
+            roomId: 'old-bilibili',
+            includeGifts: false,
+          },
         },
         output: {
           format: '[{platform}] {username}: {content}',
@@ -58,6 +66,7 @@ describe('loadConfig', () => {
     process.env.HTTP_PORT = '3011';
     process.env.DOUYU_ROOM_ID = '123';
     process.env.HUYA_ROOM_ID = '456';
+    process.env.BILIBILI_ROOM_ID = '789';
     process.env.QUEUE_INTERVAL_MS = '500';
 
     const config = await loadConfig(configPath);
@@ -67,6 +76,8 @@ describe('loadConfig', () => {
     expect(config.platforms.douyu.roomId).toBe('123');
     expect(config.platforms.huya.enabled).toBe(true);
     expect(config.platforms.huya.roomId).toBe('456');
+    expect(config.platforms.bilibili.enabled).toBe(true);
+    expect(config.platforms.bilibili.roomId).toBe('789');
     expect(config.output.queueIntervalMs).toBe(500);
 
     await rm(dir, { recursive: true, force: true });
@@ -92,6 +103,11 @@ describe('loadConfig', () => {
           huya: {
             enabled: true,
             roomId: 'old-huya',
+            includeGifts: false,
+          },
+          bilibili: {
+            enabled: true,
+            roomId: 'old-bilibili',
             includeGifts: false,
           },
         },
