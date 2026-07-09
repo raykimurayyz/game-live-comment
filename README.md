@@ -162,3 +162,7 @@ Redirect these Twitch IRC domains to the machine running this service:
 - `tmi.twitch.tv:6667`
 
 DNS is intentionally not bundled in this first version.
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.

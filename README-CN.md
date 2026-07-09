@@ -181,3 +181,7 @@ npm run test
 - `tmi.twitch.tv:6667`
 
 当前版本不内置 DNS 服务。
+
+## 许可证
+
+本项目使用 MIT 许可证。详情见 [LICENSE](LICENSE)。
