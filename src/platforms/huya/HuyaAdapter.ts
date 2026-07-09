@@ -1,5 +1,5 @@
 import { EventEmitter } from 'node:events';
-import HuyaDanmu, { type HuyaMessage } from 'huya-danmu';
+import HuyaDanmu, { type HuYaMessage } from 'huya-danma-listener';
 import type { LiveComment } from '../../core/LiveComment.js';
 import { logger } from '../../utils/logger.js';
 import type { PlatformAdapter, PlatformStatus } from '../PlatformAdapter.js';
@@ -96,7 +96,7 @@ export class HuyaAdapter implements PlatformAdapter {
     };
   }
 
-  private handleMessage(message: HuyaMessage): void {
+  private handleMessage(message: HuYaMessage): void {
     if (message.type === 'chat') {
       this.emitComment({
         platform: 'huya',
