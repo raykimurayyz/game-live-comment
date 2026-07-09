@@ -2,6 +2,7 @@ import { loadConfig } from './config/config.js';
 import { CommentBus } from './core/CommentBus.js';
 import type { LiveComment } from './core/LiveComment.js';
 import { TwitchIrcOutput } from './output/TwitchIrcOutput.js';
+import { BilibiliAdapter } from './platforms/bilibili/BilibiliAdapter.js';
 import { DouyuAdapter } from './platforms/douyu/DouyuAdapter.js';
 import { HuyaAdapter } from './platforms/huya/HuyaAdapter.js';
 import { TwitchIrcServer } from './twitch/TwitchIrcServer.js';
@@ -35,6 +36,12 @@ async function bootstrap(): Promise<void> {
   });
   huyaAdapter.onComment((comment) => bus.publish(comment));
 
+  const bilibiliAdapter = new BilibiliAdapter({
+    roomId: config.platforms.bilibili.roomId,
+    includeGifts: config.platforms.bilibili.includeGifts,
+  });
+  bilibiliAdapter.onComment((comment) => bus.publish(comment));
+
   let httpServer: HttpServer;
   httpServer = new HttpServer({
     host: config.server.host,
@@ -53,6 +60,13 @@ async function bootstrap(): Promise<void> {
               status: 'disabled',
               roomId: config.platforms.huya.roomId,
             },
+        bilibili: config.platforms.bilibili.enabled || bilibiliAdapter.getStatus().status !== 'idle'
+          ? bilibiliAdapter.getStatus()
+          : {
+              name: 'bilibili',
+              status: 'disabled',
+              roomId: config.platforms.bilibili.roomId,
+            },
       },
       comments: bus.getStats(),
     }),
@@ -65,11 +79,15 @@ async function bootstrap(): Promise<void> {
     switchHuyaRoom: async (roomId) => {
       await huyaAdapter.switchRoom(roomId);
     },
+    switchBilibiliRoom: async (roomId) => {
+      await bilibiliAdapter.switchRoom(roomId);
+    },
   });
   await httpServer.start();
 
   const douyuConfigured = config.platforms.douyu.enabled && config.platforms.douyu.roomId.trim().length > 0;
   const huyaConfigured = config.platforms.huya.enabled && config.platforms.huya.roomId.trim().length > 0;
+  const bilibiliConfigured = config.platforms.bilibili.enabled && config.platforms.bilibili.roomId.trim().length > 0;
 
   if (douyuConfigured) {
     await douyuAdapter.connect();
@@ -87,7 +105,15 @@ async function bootstrap(): Promise<void> {
     logger.info({ roomId: config.platforms.huya.roomId }, 'huya adapter disabled');
   }
 
-  if (!douyuConfigured && !huyaConfigured) {
+  if (bilibiliConfigured) {
+    await bilibiliAdapter.connect();
+  } else if (config.platforms.bilibili.enabled) {
+    logger.error('bilibili adapter enabled but BILIBILI_ROOM_ID/platforms.bilibili.roomId is not configured');
+  } else {
+    logger.info({ roomId: config.platforms.bilibili.roomId }, 'bilibili adapter disabled');
+  }
+
+  if (!douyuConfigured && !huyaConfigured && !bilibiliConfigured) {
     logger.error('no streaming platform room configured; platform adapters will not receive comments');
   }
 
@@ -96,6 +122,7 @@ async function bootstrap(): Promise<void> {
     twitchOutput.stop();
     await douyuAdapter.disconnect();
     await huyaAdapter.disconnect();
+    await bilibiliAdapter.disconnect();
     await httpServer.stop();
     await twitchServer.stop();
     process.exit(0);

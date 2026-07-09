@@ -2,6 +2,7 @@
   "name": "gamelivecomment",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/main.ts",
@@ -12,6 +13,7 @@
   },
   "dependencies": {
     "@fastify/websocket": "^11.0.2",
+    "bilibili-live-danmaku": "^0.7.16",
     "fastify": "^5.4.0",
     "huya-danmu": "^2.0.3",
     "pino": "^9.7.0",

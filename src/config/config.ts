@@ -14,6 +14,7 @@ function applyEnvOverrides(config: unknown): unknown {
   const platforms = ensureObject(next, 'platforms');
   const douyu = ensureObject(platforms, 'douyu');
   const huya = ensureObject(platforms, 'huya');
+  const bilibili = ensureObject(platforms, 'bilibili');
   const output = ensureObject(next, 'output');
 
   setString(server, 'host', process.env.SERVER_HOST);
@@ -25,6 +26,9 @@ function applyEnvOverrides(config: unknown): unknown {
 
   setPlatformEnv(huya, process.env.HUYA_ENABLED, process.env.HUYA_ROOM_ID);
   setBoolean(huya, 'includeGifts', process.env.HUYA_INCLUDE_GIFTS);
+
+  setPlatformEnv(bilibili, process.env.BILIBILI_ENABLED, process.env.BILIBILI_ROOM_ID);
+  setBoolean(bilibili, 'includeGifts', process.env.BILIBILI_INCLUDE_GIFTS);
 
   setString(output, 'format', process.env.OUTPUT_FORMAT);
   setNumber(output, 'queueIntervalMs', process.env.QUEUE_INTERVAL_MS);

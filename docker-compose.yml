@@ -14,3 +14,5 @@ services:
       DOUYU_INCLUDE_GIFTS: "false"
       HUYA_ROOM_ID: ""
       HUYA_INCLUDE_GIFTS: "false"
+      BILIBILI_ROOM_ID: ""
+      BILIBILI_INCLUDE_GIFTS: "false"
