@@ -1,4 +1,4 @@
-import { loadConfig } from './config/config.js';
+import { loadConfig, saveConfig } from './config/config.js';
 import { CommentBus } from './core/CommentBus.js';
 import type { LiveComment } from './core/LiveComment.js';
 import { TwitchIrcOutput } from './output/TwitchIrcOutput.js';
@@ -75,12 +75,21 @@ async function bootstrap(): Promise<void> {
     },
     switchDouyuRoom: async (roomId) => {
       await douyuAdapter.switchRoom(roomId);
+      config.platforms.douyu.roomId = roomId;
+      config.platforms.douyu.enabled = roomId.trim().length > 0;
+      await saveConfig(config);
     },
     switchHuyaRoom: async (roomId) => {
       await huyaAdapter.switchRoom(roomId);
+      config.platforms.huya.roomId = roomId;
+      config.platforms.huya.enabled = roomId.trim().length > 0;
+      await saveConfig(config);
     },
     switchBilibiliRoom: async (roomId) => {
       await bilibiliAdapter.switchRoom(roomId);
+      config.platforms.bilibili.roomId = roomId;
+      config.platforms.bilibili.enabled = roomId.trim().length > 0;
+      await saveConfig(config);
     },
   });
   await httpServer.start();

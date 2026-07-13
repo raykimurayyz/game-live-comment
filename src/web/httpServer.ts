@@ -26,7 +26,7 @@ const testCommentSchema = z
   .optional();
 
 const switchRoomSchema = z.object({
-  roomId: z.string().min(1),
+  roomId: z.string(),
 });
 
 export class HttpServer {
