@@ -139,6 +139,12 @@ environment:
 curl http://127.0.0.1:3010/api/status
 ```
 
+## Web 页面房间设置
+
+`/overlay` 页面顶部提供房间设置栏，可以直接修改斗鱼、虎牙和 B 站房间号。房间号留空会停用对应平台。
+
+页面提交后会立即切换运行中的平台连接，并写回 `config.json` 或 `CONFIG_PATH` 指向的配置文件。如果 Docker 启动时设置了 `DOUYU_ROOM_ID` 等环境变量，容器重启后环境变量仍会覆盖配置文件。若希望页面保存长期生效，建议挂载 `/app/config.json`，并避免用环境变量覆盖同一个房间号。
+
 ## API
 
 - `GET /overlay`：Web 调试页面，可作为 OBS 浏览器源

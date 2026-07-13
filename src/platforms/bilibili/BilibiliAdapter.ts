@@ -67,6 +67,11 @@ export class BilibiliAdapter implements PlatformAdapter {
       roomId,
     };
     await this.disconnect();
+    if (!roomId.trim()) {
+      this.status = 'disabled';
+      this.lastError = undefined;
+      return;
+    }
     await this.connect();
   }
 

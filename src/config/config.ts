@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { appConfigSchema, type AppConfig } from './schema.js';
 
@@ -6,6 +6,12 @@ export async function loadConfig(path = process.env.CONFIG_PATH ?? 'config.json'
   const filePath = resolve(process.cwd(), path);
   const raw = await readFile(filePath, 'utf8');
   return appConfigSchema.parse(applyEnvOverrides(JSON.parse(raw)));
+}
+
+export async function saveConfig(config: AppConfig, path = process.env.CONFIG_PATH ?? 'config.json'): Promise<void> {
+  const filePath = resolve(process.cwd(), path);
+  const parsed = appConfigSchema.parse(config);
+  await writeFile(filePath, `${JSON.stringify(parsed, null, 2)}\n`, 'utf8');
 }
 
 function applyEnvOverrides(config: unknown): unknown {

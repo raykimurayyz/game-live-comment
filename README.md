@@ -120,6 +120,12 @@ Supported environment variables:
 
 Setting `DOUYU_ROOM_ID`, `HUYA_ROOM_ID`, or `BILIBILI_ROOM_ID` automatically enables that platform. Use `*_ENABLED=false` only when you want to force-disable a configured platform. If a configured room cannot be resolved, that platform enters `error` status and will not keep reconnecting.
 
+## Web Overlay Settings
+
+The `/overlay` page includes a room settings bar at the top. You can update Douyu, Huya, and Bilibili room IDs there. Empty room IDs disable the corresponding platform.
+
+Room changes are applied immediately and saved to `config.json` or the file pointed to by `CONFIG_PATH`. If Docker environment variables such as `DOUYU_ROOM_ID` are set, they still take precedence after the container restarts. For persistent page-based settings in Docker, mount `/app/config.json` as a volume and avoid overriding the same room IDs with environment variables.
+
 ## API
 
 - `GET /overlay`: web overlay for debugging or OBS browser source

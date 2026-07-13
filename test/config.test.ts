@@ -2,7 +2,7 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { afterEach, describe, expect, it } from 'vitest';
-import { loadConfig } from '../src/config/config.js';
+import { loadConfig, saveConfig } from '../src/config/config.js';
 
 const envKeys = [
   'SERVER_HOST',
@@ -125,6 +125,48 @@ describe('loadConfig', () => {
 
     expect(config.platforms.douyu.enabled).toBe(false);
     expect(config.platforms.douyu.roomId).toBe('123');
+
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  it('saves config changes so they can be loaded again', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'gamelivecomment-config-'));
+    const configPath = join(dir, 'config.json');
+    const config = {
+      server: {
+        host: '0.0.0.0',
+        httpPort: 3010,
+        ircPort: 6667,
+      },
+      platforms: {
+        douyu: {
+          enabled: false,
+          roomId: '',
+          includeGifts: false,
+        },
+        huya: {
+          enabled: true,
+          roomId: '27367112',
+          includeGifts: false,
+        },
+        bilibili: {
+          enabled: false,
+          roomId: '',
+          includeGifts: false,
+        },
+      },
+      output: {
+        format: '[{platform}] {username}: {content}',
+        queueIntervalMs: 300,
+      },
+    };
+
+    await saveConfig(config, configPath);
+    const loaded = await loadConfig(configPath);
+
+    expect(loaded.platforms.huya.enabled).toBe(true);
+    expect(loaded.platforms.huya.roomId).toBe('27367112');
+    expect(loaded.platforms.douyu.enabled).toBe(false);
 
     await rm(dir, { recursive: true, force: true });
   });
