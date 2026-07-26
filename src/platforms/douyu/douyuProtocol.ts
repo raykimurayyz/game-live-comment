@@ -28,6 +28,15 @@ export function createHeartbeatRequest(): Buffer {
   return encodeDouyuPayload('type@=mrkl/');
 }
 
+export function isDouyuRoomMessage(message: DouyuMessage, roomId: string): boolean {
+  const messageRoomId = message.rid?.trim();
+  if (!messageRoomId) {
+    return true;
+  }
+
+  return messageRoomId === roomId.trim();
+}
+
 export function decodeDouyuPackets(data: Buffer): DouyuMessage[] {
   const messages: DouyuMessage[] = [];
   let offset = 0;

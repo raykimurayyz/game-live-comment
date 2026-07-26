@@ -7,12 +7,12 @@
   "platforms": {
     "douyu": {
       "enabled": true,
-      "roomId": "10942092",
+      "roomId": "",
       "includeGifts": false
     },
     "huya": {
       "enabled": true,
-      "roomId": "273671121",
+      "roomId": "",
       "includeGifts": false
     },
     "bilibili": {

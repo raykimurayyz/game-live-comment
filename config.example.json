@@ -7,7 +7,7 @@
   "platforms": {
     "douyu": {
       "enabled": true,
-      "roomId": "10942092",
+      "roomId": "",
       "includeGifts": false
     },
     "huya": {

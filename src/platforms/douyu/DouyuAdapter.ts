@@ -8,6 +8,7 @@ import {
   createJoinGroupRequest,
   createLoginRequest,
   decodeDouyuPackets,
+  isDouyuRoomMessage,
   type DouyuMessage,
 } from './douyuProtocol.js';
 
@@ -25,6 +26,7 @@ export class DouyuAdapter implements PlatformAdapter {
   private status: PlatformStatus = 'idle';
   private lastError: string | undefined;
   private stopped = false;
+  private resolvedRoomId: string | undefined;
 
   constructor(private options: DouyuAdapterOptions) {}
 
@@ -39,11 +41,12 @@ export class DouyuAdapter implements PlatformAdapter {
     this.status = 'connecting';
     this.clearReconnectTimer();
 
-    const roomExists = await this.checkRoomExists(roomId);
-    if (!roomExists) {
+    const resolvedRoomId = await this.resolveRoomId(roomId);
+    if (!resolvedRoomId) {
       this.failStartup(`douyu room does not exist or is unavailable: ${roomId}`);
       return;
     }
+    this.resolvedRoomId = resolvedRoomId;
 
     await this.openWebSocket();
   }
@@ -53,6 +56,7 @@ export class DouyuAdapter implements PlatformAdapter {
     this.status = 'disconnected';
     this.clearHeartbeatTimer();
     this.clearReconnectTimer();
+    this.resolvedRoomId = undefined;
 
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.close();
@@ -139,6 +143,10 @@ export class DouyuAdapter implements PlatformAdapter {
   private handleMessages(messages: DouyuMessage[]): void {
     for (const message of messages) {
       if (message.type === 'chatmsg') {
+        if (!this.isCurrentRoomMessage(message)) {
+          this.logDroppedRoomMessage(message);
+          continue;
+        }
         this.emitComment({
           platform: 'douyu',
           roomId: this.options.roomId,
@@ -150,6 +158,10 @@ export class DouyuAdapter implements PlatformAdapter {
       }
 
       if (this.options.includeGifts && message.type === 'dgb') {
+        if (!this.isCurrentRoomMessage(message)) {
+          this.logDroppedRoomMessage(message);
+          continue;
+        }
         this.emitComment({
           platform: 'douyu',
           roomId: this.options.roomId,
@@ -160,6 +172,29 @@ export class DouyuAdapter implements PlatformAdapter {
         });
       }
     }
+  }
+
+  private isCurrentRoomMessage(message: DouyuMessage): boolean {
+    const messageRoomId = message.rid?.trim();
+    if (!messageRoomId) {
+      return true;
+    }
+
+    const expectedRoomId = this.resolvedRoomId ?? this.options.roomId.trim();
+    return isDouyuRoomMessage(message, expectedRoomId);
+  }
+
+  private logDroppedRoomMessage(message: DouyuMessage): void {
+    logger.debug(
+      {
+        expectedRoomId: this.resolvedRoomId ?? this.options.roomId,
+        messageRoomId: message.rid,
+        messageType: message.type,
+        username: message.nn || message.uid,
+        content: message.txt,
+      },
+      'dropped douyu message from another room',
+    );
   }
 
   private emitComment(comment: LiveComment): void {
@@ -209,12 +244,12 @@ export class DouyuAdapter implements PlatformAdapter {
     }
   }
 
-  private async checkRoomExists(roomId: string): Promise<boolean> {
+  private async resolveRoomId(roomId: string): Promise<string | undefined> {
     try {
       const response = await fetch(`https://open.douyucdn.cn/api/RoomApi/room/${encodeURIComponent(roomId)}`);
       if (!response.ok) {
         logger.warn({ roomId, status: response.status }, 'douyu room preflight request failed, continuing');
-        return true;
+        return roomId;
       }
 
       const payload = (await response.json()) as {
@@ -226,14 +261,14 @@ export class DouyuAdapter implements PlatformAdapter {
       };
 
       if (payload.error === 0 && payload.data?.room_id) {
-        return true;
+        return String(payload.data.room_id);
       }
 
       this.lastError = payload.msg || `douyu room not found: ${roomId}`;
-      return false;
+      return undefined;
     } catch (error) {
       logger.warn({ error, roomId }, 'douyu room preflight request failed, continuing');
-      return true;
+      return roomId;
     }
   }
 
