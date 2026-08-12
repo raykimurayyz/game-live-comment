@@ -22,8 +22,11 @@
   },
   "overrides": {
     "esbuild": "^0.28.1",
-    "fast-uri": "^3.1.4",
+    "fast-uri": "^3.1.5",
     "find-my-way": "^9.7.0",
+    "ip-address": "^10.5.0",
+    "nanoid": "^3.3.18",
+    "postcss": "^8.5.26",
     "socks-proxy-agent": "^8.0.5",
     "ws": "^8.21.0"
   },
