@@ -63,6 +63,10 @@ export class HttpServer {
   }
 
   private registerRoutes(): void {
+    this.app.get('/', async (_request, reply) => {
+      reply.type('text/html; charset=utf-8').send(overlayHtml);
+    });
+
     this.app.get('/overlay', async (_request, reply) => {
       reply.type('text/html; charset=utf-8').send(overlayHtml);
     });

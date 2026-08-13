@@ -4,24 +4,20 @@ Forward live comments from streaming platforms to a PS5 Twitch chat overlay and 
 
 ## Quick Start
 
+After the container starts, open `http://127.0.0.1:3010/` and configure room IDs there.
+
 ```bash
 docker run -d \
   --name gamelivecomment \
   --restart unless-stopped \
   -p 3010:3010 \
   -p 6667:6667 \
-  -e DOUYU_ROOM_ID=10942092 \
-  -e DOUYU_INCLUDE_GIFTS=false \
-  -e HUYA_ROOM_ID=27367112 \
-  -e HUYA_INCLUDE_GIFTS=false \
-  -e BILIBILI_ROOM_ID=6 \
-  -e BILIBILI_INCLUDE_GIFTS=false \
   __IMAGE_NAME__:latest
 ```
 
 Open:
 
-- `http://127.0.0.1:3010/overlay`
+- `http://127.0.0.1:3010/`
 - `http://127.0.0.1:3010/api/status`
 
 ## Ports
@@ -54,7 +50,8 @@ Setting `DOUYU_ROOM_ID`, `HUYA_ROOM_ID`, or `BILIBILI_ROOM_ID` automatically ena
 
 ## API
 
-- `GET /overlay`: web overlay for debugging or OBS browser source
+- `GET /`: web overlay for debugging
+- `GET /overlay`: the same web overlay, useful as an OBS browser source
 - `GET /api/status`: service, platform, queue, and recent comment status
 - `POST /api/test-comment`: publish a local test comment
 - `POST /api/platforms/douyu/room`: switch Douyu room and reconnect

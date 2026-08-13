@@ -10,7 +10,7 @@ Game Live Comment 用于把指定直播平台的弹幕转发到 PS5 的 Twitch �
 - 虎牙单房间弹幕
 - B 站单房间弹幕，不需要登录
 - PS5 Twitch IRC/TMI 模拟器，默认监听 `6667`
-- Web 调试页面：`/overlay`
+- Web 调试页面：`/` 和 `/overlay`
 - 状态接口：`/api/status`
 - 测试弹幕接口：`/api/test-comment`
 
@@ -23,7 +23,7 @@ npm run dev
 
 打开：
 
-- `http://127.0.0.1:3010/overlay`
+- `http://127.0.0.1:3010/`
 - `http://127.0.0.1:3010/api/status`
 
 发送本地测试弹幕：
@@ -36,33 +36,41 @@ curl -X POST http://127.0.0.1:3010/api/test-comment \
 
 切换斗鱼房间：
 
+下面的 `123456` 只是示例房间号，使用时请替换为自己的斗鱼房间号。
+
 ```bash
 curl -X POST http://127.0.0.1:3010/api/platforms/douyu/room \
   -H 'content-type: application/json' \
-  -d '{"roomId":"10942092"}'
+  -d '{"roomId":"123456"}'
 ```
 
 切换虎牙房间：
 
+下面的 `123456` 只是示例房间号，使用时请替换为自己的虎牙房间号。
+
 ```bash
 curl -X POST http://127.0.0.1:3010/api/platforms/huya/room \
   -H 'content-type: application/json' \
-  -d '{"roomId":"27367112"}'
+  -d '{"roomId":"123456"}'
 ```
 
 切换 B 站房间：
 
+下面的 `123456` 只是示例房间号，使用时请替换为自己的 B 站房间号。
+
 ```bash
 curl -X POST http://127.0.0.1:3010/api/platforms/bilibili/room \
   -H 'content-type: application/json' \
-  -d '{"roomId":"6"}'
+  -d '{"roomId":"123456"}'
 ```
 
 ## Docker 配置
 
-推荐通过环境变量配置房间号。环境变量优先级高于 `config.json`。
+推荐通过 Web 页面配置房间号。环境变量仍然可用，且优先级高于 `config.json`。
 
 使用已发布的镜像：
+
+容器启动后，打开 `http://127.0.0.1:3010/` 填写房间号。
 
 ```bash
 docker run -d \
@@ -70,21 +78,12 @@ docker run -d \
   --restart unless-stopped \
   -p 3010:3010 \
   -p 6667:6667 \
-  -e DOUYU_ROOM_ID=10942092 \
-  -e DOUYU_INCLUDE_GIFTS=false \
-  -e HUYA_ROOM_ID=27367112 \
-  -e HUYA_INCLUDE_GIFTS=false \
-  -e BILIBILI_ROOM_ID=6 \
-  -e BILIBILI_INCLUDE_GIFTS=false \
   your-dockerhub-username/gamelivecomment:latest
 ```
 
 也可以用 Docker Compose 在本地构建：
 
 ```bash
-DOUYU_ROOM_ID=10942092 \
-HUYA_ROOM_ID=27367112 \
-BILIBILI_ROOM_ID=6 \
 docker compose up -d --build
 ```
 
@@ -93,11 +92,11 @@ docker compose up -d --build
 ```yaml
 environment:
   NODE_ENV: production
-  DOUYU_ROOM_ID: "10942092"
+  DOUYU_ROOM_ID: ""
   DOUYU_INCLUDE_GIFTS: "false"
-  HUYA_ROOM_ID: "27367112"
+  HUYA_ROOM_ID: ""
   HUYA_INCLUDE_GIFTS: "false"
-  BILIBILI_ROOM_ID: "6"
+  BILIBILI_ROOM_ID: ""
   BILIBILI_INCLUDE_GIFTS: "false"
 ```
 
@@ -141,13 +140,14 @@ curl http://127.0.0.1:3010/api/status
 
 ## Web 页面房间设置
 
-`/overlay` 页面顶部提供房间设置栏，可以直接修改斗鱼、虎牙和 B 站房间号。房间号留空会停用对应平台。
+Web 页面提供房间设置栏，可以直接修改斗鱼、虎牙和 B 站房间号。房间号留空会停用对应平台。
 
 页面提交后会立即切换运行中的平台连接，并写回 `config.json` 或 `CONFIG_PATH` 指向的配置文件。如果 Docker 启动时设置了 `DOUYU_ROOM_ID` 等环境变量，容器重启后环境变量仍会覆盖配置文件。若希望页面保存长期生效，建议挂载 `/app/config.json`，并避免用环境变量覆盖同一个房间号。
 
 ## API
 
-- `GET /overlay`：Web 调试页面，可作为 OBS 浏览器源
+- `GET /`：Web 调试页面
+- `GET /overlay`：同一个 Web 调试页面，可作为 OBS 浏览器源
 - `GET /api/status`：查看服务、平台、队列和最近弹幕状态
 - `POST /api/test-comment`：发送本地测试弹幕
 - `POST /api/platforms/douyu/room`：切换斗鱼房间并重连
