@@ -1,17 +1,43 @@
-import { readFile, writeFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { dirname, resolve } from 'node:path';
 import { appConfigSchema, type AppConfig } from './schema.js';
 
 export async function loadConfig(path = process.env.CONFIG_PATH ?? 'config.json'): Promise<AppConfig> {
   const filePath = resolve(process.cwd(), path);
-  const raw = await readFile(filePath, 'utf8');
+  let raw: string;
+
+  try {
+    raw = await readFile(filePath, 'utf8');
+  } catch (error) {
+    if (!isFileNotFound(error)) {
+      throw error;
+    }
+
+    const config = createDefaultConfig();
+    await saveConfig(config, filePath);
+    return appConfigSchema.parse(applyEnvOverrides(config));
+  }
+
   return appConfigSchema.parse(applyEnvOverrides(JSON.parse(raw)));
 }
 
 export async function saveConfig(config: AppConfig, path = process.env.CONFIG_PATH ?? 'config.json'): Promise<void> {
   const filePath = resolve(process.cwd(), path);
   const parsed = appConfigSchema.parse(config);
+  await mkdir(dirname(filePath), { recursive: true });
   await writeFile(filePath, `${JSON.stringify(parsed, null, 2)}\n`, 'utf8');
+}
+
+export function createDefaultConfig(): AppConfig {
+  return appConfigSchema.parse({
+    server: {},
+    platforms: {
+      douyu: {},
+      huya: {},
+      bilibili: {},
+    },
+    output: {},
+  });
 }
 
 function applyEnvOverrides(config: unknown): unknown {
@@ -99,4 +125,8 @@ function parseOptionalBoolean(value: string | undefined): boolean | undefined {
 
 function parseBoolean(value: string): boolean {
   return ['1', 'true', 'yes', 'on'].includes(value.toLowerCase());
+}
+
+function isFileNotFound(error: unknown): boolean {
+  return error instanceof Error && 'code' in error && error.code === 'ENOENT';
 }

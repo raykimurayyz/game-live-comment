@@ -12,6 +12,7 @@ docker run -d \
   --restart unless-stopped \
   -p 3010:3010 \
   -p 6667:6667 \
+  -v gamelivecomment-data:/app/data \
   __IMAGE_NAME__:latest
 ```
 
@@ -27,7 +28,7 @@ Open:
 
 ## Configuration
 
-Environment variables override `config.json`.
+The official Docker image stores page-based settings in `/app/data/config.json`. Use the same Docker volume when recreating the container to keep saved room IDs after image updates. Environment variables still override saved config values.
 
 | Variable | Meaning |
 | --- | --- |

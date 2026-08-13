@@ -76,6 +76,7 @@ docker run -d \
   --restart unless-stopped \
   -p 3010:3010 \
   -p 6667:6667 \
+  -v gamelivecomment-data:/app/data \
   your-dockerhub-username/gamelivecomment:latest
 ```
 
@@ -90,7 +91,7 @@ Ports:
 - `3010/tcp`: HTTP API and web overlay
 - `6667/tcp`: Twitch IRC/TMI emulator for PS5
 
-You can either edit `config.json` or override values with environment variables. Environment variables take precedence over `config.json`.
+The official Docker image stores page-based settings in `/app/data/config.json`. Use the same Docker volume when recreating the container to keep saved room IDs after image updates.
 
 Docker Compose example:
 
@@ -123,7 +124,7 @@ Setting `DOUYU_ROOM_ID`, `HUYA_ROOM_ID`, or `BILIBILI_ROOM_ID` automatically ena
 
 The web page includes room settings. You can update Douyu, Huya, and Bilibili room IDs there. Empty room IDs disable the corresponding platform.
 
-Room changes are applied immediately and saved to `config.json` or the file pointed to by `CONFIG_PATH`. If Docker environment variables such as `DOUYU_ROOM_ID` are set, they still take precedence after the container restarts. For persistent page-based settings in Docker, mount `/app/config.json` as a volume and avoid overriding the same room IDs with environment variables.
+Room changes are applied immediately and saved to `config.json` or the file pointed to by `CONFIG_PATH`. The official Docker image uses `CONFIG_PATH=/app/data/config.json`; prefer a Docker named volume for `/app/data`. If Docker environment variables such as `DOUYU_ROOM_ID` are set, they still take precedence after the container restarts.
 
 ## API
 
