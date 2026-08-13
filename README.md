@@ -10,7 +10,7 @@ First version:
 - Huya single-room adapter
 - Bilibili single-room adapter without login
 - Twitch IRC/TMI emulator on port `6667`
-- Web overlay at `/overlay`
+- Web overlay at `/` and `/overlay`
 - Status API at `/api/status`
 - Test comment API at `/api/test-comment`
 
@@ -23,7 +23,7 @@ npm run dev
 
 Open:
 
-- `http://127.0.0.1:3010/overlay`
+- `http://127.0.0.1:3010/`
 - `http://127.0.0.1:3010/api/status`
 
 Send a local test comment:
@@ -36,31 +36,39 @@ curl -X POST http://127.0.0.1:3010/api/test-comment \
 
 Switch Douyu room:
 
+`123456` is a sample room ID. Replace it with your own Douyu room ID.
+
 ```bash
 curl -X POST http://127.0.0.1:3010/api/platforms/douyu/room \
   -H 'content-type: application/json' \
-  -d '{"roomId":"10942092"}'
+  -d '{"roomId":"123456"}'
 ```
 
 Switch Huya room:
 
+`123456` is a sample room ID. Replace it with your own Huya room ID.
+
 ```bash
 curl -X POST http://127.0.0.1:3010/api/platforms/huya/room \
   -H 'content-type: application/json' \
-  -d '{"roomId":"kaerlol"}'
+  -d '{"roomId":"123456"}'
 ```
 
 Switch Bilibili room:
 
+`123456` is a sample room ID. Replace it with your own Bilibili room ID.
+
 ```bash
 curl -X POST http://127.0.0.1:3010/api/platforms/bilibili/room \
   -H 'content-type: application/json' \
-  -d '{"roomId":"6"}'
+  -d '{"roomId":"123456"}'
 ```
 
 ## Docker
 
 Use the published image:
+
+After the container starts, open `http://127.0.0.1:3010/` and configure room IDs there.
 
 ```bash
 docker run -d \
@@ -68,12 +76,6 @@ docker run -d \
   --restart unless-stopped \
   -p 3010:3010 \
   -p 6667:6667 \
-  -e DOUYU_ROOM_ID=10942092 \
-  -e DOUYU_INCLUDE_GIFTS=false \
-  -e HUYA_ROOM_ID=27367112 \
-  -e HUYA_INCLUDE_GIFTS=false \
-  -e BILIBILI_ROOM_ID=6 \
-  -e BILIBILI_INCLUDE_GIFTS=false \
   your-dockerhub-username/gamelivecomment:latest
 ```
 
@@ -93,9 +95,6 @@ You can either edit `config.json` or override values with environment variables.
 Docker Compose example:
 
 ```bash
-DOUYU_ROOM_ID=10942092 \
-HUYA_ROOM_ID=27367112 \
-BILIBILI_ROOM_ID=6 \
 docker compose up -d --build
 ```
 
@@ -122,13 +121,14 @@ Setting `DOUYU_ROOM_ID`, `HUYA_ROOM_ID`, or `BILIBILI_ROOM_ID` automatically ena
 
 ## Web Overlay Settings
 
-The `/overlay` page includes a room settings bar at the top. You can update Douyu, Huya, and Bilibili room IDs there. Empty room IDs disable the corresponding platform.
+The web page includes room settings. You can update Douyu, Huya, and Bilibili room IDs there. Empty room IDs disable the corresponding platform.
 
 Room changes are applied immediately and saved to `config.json` or the file pointed to by `CONFIG_PATH`. If Docker environment variables such as `DOUYU_ROOM_ID` are set, they still take precedence after the container restarts. For persistent page-based settings in Docker, mount `/app/config.json` as a volume and avoid overriding the same room IDs with environment variables.
 
 ## API
 
-- `GET /overlay`: web overlay for debugging or OBS browser source
+- `GET /`: web overlay for debugging
+- `GET /overlay`: the same web overlay, useful as an OBS browser source
 - `GET /api/status`: service, platform, queue, and recent comment status
 - `POST /api/test-comment`: publish a local test comment
 - `POST /api/platforms/douyu/room`: switch Douyu room and reconnect
