@@ -10,6 +10,8 @@ services:
       - gamelivecomment-data:/app/data
     environment:
       NODE_ENV: production
+      HTTP_PORT: "3010"
+      IRC_PORT: "6667"
 
 volumes:
   gamelivecomment-data:
