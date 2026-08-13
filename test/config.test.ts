@@ -187,7 +187,7 @@ describe('loadConfig', () => {
     expect(saved).toEqual({
       server: {
         host: '0.0.0.0',
-        httpPort: 3000,
+        httpPort: 3010,
         ircPort: 6667,
       },
       platforms: {

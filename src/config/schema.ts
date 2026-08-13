@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const appConfigSchema = z.object({
   server: z.object({
     host: z.string().default('0.0.0.0'),
-    httpPort: z.number().int().positive().default(3000),
+    httpPort: z.number().int().positive().default(3010),
     ircPort: z.number().int().positive().default(6667),
   }),
   platforms: z.object({

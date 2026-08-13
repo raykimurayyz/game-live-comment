@@ -18,6 +18,8 @@ FROM node:24-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 ENV CONFIG_PATH=/app/data/config.json
+ENV HTTP_PORT=3010
+ENV IRC_PORT=6667
 RUN apk upgrade --no-cache \
   && rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx /root/.npm
 COPY --from=prod-deps /app/node_modules ./node_modules
