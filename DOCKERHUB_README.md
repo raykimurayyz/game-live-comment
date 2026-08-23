@@ -28,7 +28,7 @@ Open:
 
 ## Configuration
 
-The official Docker image stores page-based settings in `/app/data/config.json`. Use the same Docker volume when recreating the container to keep saved room IDs after image updates. Environment variables still override saved config values.
+The official Docker image stores room settings in `/app/data/config.json`. Use the same Docker volume when recreating the container to keep saved room IDs after image updates. UI language is stored in the current browser and is not written to the container config. Environment variables still override saved config values.
 
 | Variable | Meaning |
 | --- | --- |

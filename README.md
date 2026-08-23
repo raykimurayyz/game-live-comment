@@ -91,7 +91,7 @@ Ports:
 - `3010/tcp`: HTTP API and web overlay
 - `6667/tcp`: Twitch IRC/TMI emulator for PS5
 
-The official Docker image stores page-based settings in `/app/data/config.json`. Use the same Docker volume when recreating the container to keep saved room IDs after image updates.
+The official Docker image stores room settings in `/app/data/config.json`. Use the same Docker volume when recreating the container to keep saved room IDs after image updates. UI language is stored in the current browser and is not written to the container config.
 
 Docker Compose example:
 
@@ -122,7 +122,7 @@ Setting `DOUYU_ROOM_ID`, `HUYA_ROOM_ID`, or `BILIBILI_ROOM_ID` automatically ena
 
 ## Web Overlay Settings
 
-The web page includes room settings. You can update Douyu, Huya, and Bilibili room IDs there. Empty room IDs disable the corresponding platform.
+The web page includes room settings. You can update Douyu, Huya, and Bilibili room IDs there. Empty room IDs disable the corresponding platform. UI language is saved in the current browser only.
 
 Room changes are applied immediately and saved to `config.json` or the file pointed to by `CONFIG_PATH`. The official Docker image uses `CONFIG_PATH=/app/data/config.json`; prefer a Docker named volume for `/app/data`. If Docker environment variables such as `DOUYU_ROOM_ID` are set, they still take precedence after the container restarts.
 
