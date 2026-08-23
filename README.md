@@ -5,7 +5,7 @@
 [![Docker Image Version](https://img.shields.io/docker/v/raykimurayyz/gamelivecomment?sort=semver)](https://hub.docker.com/r/raykimurayyz/gamelivecomment/tags)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-[中文说明](README-CN.md)
+[中文说明](README-CN.md) · [Docker Hub](https://hub.docker.com/r/raykimurayyz/gamelivecomment)
 
 Game Live Comment forwards live comments from specified streaming platforms to a PlayStation Twitch chat overlay and a local web monitor.
 
