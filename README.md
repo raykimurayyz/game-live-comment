@@ -1,5 +1,10 @@
 # Game Live Comment
 
+[![CI](https://github.com/raykimurayyz/game-live-comment/actions/workflows/ci.yml/badge.svg)](https://github.com/raykimurayyz/game-live-comment/actions/workflows/ci.yml)
+[![Docker Pulls](https://img.shields.io/docker/pulls/raykimurayyz/gamelivecomment)](https://hub.docker.com/r/raykimurayyz/gamelivecomment)
+[![Docker Image Version](https://img.shields.io/docker/v/raykimurayyz/gamelivecomment?sort=semver)](https://hub.docker.com/r/raykimurayyz/gamelivecomment/tags)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 [中文说明](README-CN.md)
 
 Game Live Comment forwards live comments from specified streaming platforms to a PlayStation Twitch chat overlay and a local web monitor.
