@@ -5,7 +5,7 @@
 [![Docker Image Version](https://img.shields.io/docker/v/raykimurayyz/gamelivecomment?sort=semver)](https://hub.docker.com/r/raykimurayyz/gamelivecomment/tags)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-[English](README.md)
+[English](README.md) · [Docker Hub](https://hub.docker.com/r/raykimurayyz/gamelivecomment)
 
 Game Live Comment 用于把指定直播平台的弹幕转发到 PlayStation 的 Twitch 聊天浮层，同时提供本地 Web 监控页面。
 
