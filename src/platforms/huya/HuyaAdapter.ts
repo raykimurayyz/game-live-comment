@@ -106,7 +106,7 @@ export class HuyaAdapter implements PlatformAdapter {
       this.emitComment({
         platform: 'huya',
         roomId: this.options.roomId,
-        username: message.from.name || '虎牙用户',
+        username: message.from.name || 'Huya User',
         content: message.content,
         type: 'chat',
         timestamp: Date.now(),
@@ -118,8 +118,8 @@ export class HuyaAdapter implements PlatformAdapter {
       this.emitComment({
         platform: 'huya',
         roomId: this.options.roomId,
-        username: message.from.name || '虎牙用户',
-        content: `送出礼物 ${message.name}${message.count ? ` x${message.count}` : ''}`.trim(),
+        username: message.from.name || 'Huya User',
+        content: `Sent gift ${message.name}${message.count ? ` x${message.count}` : ''}`.trim(),
         type: 'gift',
         timestamp: Date.now(),
       });

@@ -150,7 +150,7 @@ export class DouyuAdapter implements PlatformAdapter {
         this.emitComment({
           platform: 'douyu',
           roomId: this.options.roomId,
-          username: message.nn || message.uid || '斗鱼用户',
+          username: message.nn || message.uid || 'Douyu User',
           content: message.txt || '',
           type: 'chat',
           timestamp: Date.now(),
@@ -165,8 +165,8 @@ export class DouyuAdapter implements PlatformAdapter {
         this.emitComment({
           platform: 'douyu',
           roomId: this.options.roomId,
-          username: message.nn || message.uid || '斗鱼用户',
-          content: `送出礼物 ${message.gfid || ''}${message.gfcnt ? ` x${message.gfcnt}` : ''}`.trim(),
+          username: message.nn || message.uid || 'Douyu User',
+          content: `Sent gift ${message.gfid || ''}${message.gfcnt ? ` x${message.gfcnt}` : ''}`.trim(),
           type: 'gift',
           timestamp: Date.now(),
         });

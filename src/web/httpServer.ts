@@ -12,9 +12,9 @@ type HttpServerOptions = {
   bus: CommentBus;
   getStatus: () => unknown;
   publishTestComment: (comment?: Partial<LiveComment>) => void;
-  switchDouyuRoom: (roomId: string) => Promise<void>;
-  switchHuyaRoom: (roomId: string) => Promise<void>;
-  switchBilibiliRoom: (roomId: string) => Promise<void>;
+  switchDouyuRoom: (roomId: string, enabled?: boolean) => Promise<void>;
+  switchHuyaRoom: (roomId: string, enabled?: boolean) => Promise<void>;
+  switchBilibiliRoom: (roomId: string, enabled?: boolean) => Promise<void>;
 };
 
 const testCommentSchema = z
@@ -27,6 +27,7 @@ const testCommentSchema = z
 
 const switchRoomSchema = z.object({
   roomId: z.string(),
+  enabled: z.boolean().optional(),
 });
 
 export class HttpServer {
@@ -81,20 +82,20 @@ export class HttpServer {
 
     this.app.post('/api/platforms/douyu/room', async (request) => {
       const input = switchRoomSchema.parse(request.body);
-      await this.options.switchDouyuRoom(input.roomId);
-      return { ok: true, roomId: input.roomId };
+      await this.options.switchDouyuRoom(input.roomId, input.enabled);
+      return { ok: true, roomId: input.roomId, enabled: isPlatformEnabled(input.roomId, input.enabled) };
     });
 
     this.app.post('/api/platforms/huya/room', async (request) => {
       const input = switchRoomSchema.parse(request.body);
-      await this.options.switchHuyaRoom(input.roomId);
-      return { ok: true, roomId: input.roomId };
+      await this.options.switchHuyaRoom(input.roomId, input.enabled);
+      return { ok: true, roomId: input.roomId, enabled: isPlatformEnabled(input.roomId, input.enabled) };
     });
 
     this.app.post('/api/platforms/bilibili/room', async (request) => {
       const input = switchRoomSchema.parse(request.body);
-      await this.options.switchBilibiliRoom(input.roomId);
-      return { ok: true, roomId: input.roomId };
+      await this.options.switchBilibiliRoom(input.roomId, input.enabled);
+      return { ok: true, roomId: input.roomId, enabled: isPlatformEnabled(input.roomId, input.enabled) };
     });
 
     this.app.get('/ws/comments', { websocket: true }, (socket) => {
@@ -118,4 +119,8 @@ export class HttpServer {
       client.send(payload);
     }
   }
+}
+
+function isPlatformEnabled(roomId: string, enabled: boolean | undefined): boolean {
+  return roomId.trim().length > 0 && (enabled ?? true);
 }

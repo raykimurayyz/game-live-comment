@@ -23,13 +23,13 @@ export function formatLiveComment(comment: LiveComment, format: string): string 
 export function platformLabel(platform: LivePlatform): string {
   switch (platform) {
     case 'douyu':
-      return '斗鱼';
+      return 'Douyu';
     case 'huya':
-      return '虎牙';
+      return 'Huya';
     case 'bilibili':
-      return 'B站';
+      return 'Bilibili';
     case 'mock':
-      return '测试';
+      return 'Test';
   }
 }
 
