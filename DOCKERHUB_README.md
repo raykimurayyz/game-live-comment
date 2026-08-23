@@ -8,6 +8,10 @@ Supported platforms:
 - Huya
 - Bilibili, without login
 
+## Preview
+
+![Game Live Comment web monitor](https://raw.githubusercontent.com/raykimurayyz/game-live-comment/main/docs/screenshots/en/live-monitor.png)
+
 ## Quick Start
 
 Start the container:
