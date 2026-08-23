@@ -130,7 +130,7 @@ curl http://127.0.0.1:3010/api/status
 
 ## Web 页面房间设置
 
-Web 页面提供房间设置栏，可以直接修改斗鱼、虎牙和 B 站房间号。房间号留空会停用对应平台。
+Web 页面提供房间设置栏，可以直接修改斗鱼、虎牙和 B 站房间号。房间号留空会停用对应平台。界面语言只保存在当前浏览器本地，不写入容器配置文件。
 
 页面提交后会立即切换运行中的平台连接，并写回 `config.json` 或 `CONFIG_PATH` 指向的配置文件。官方 Docker 镜像默认使用 `CONFIG_PATH=/app/data/config.json`，建议通过 Docker named volume 持久化 `/app/data`。如果 Docker 启动时设置了 `DOUYU_ROOM_ID` 等环境变量，容器重启后环境变量仍会覆盖页面保存的配置。
 

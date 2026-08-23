@@ -1,5 +1,5 @@
 export const overlayHtml = String.raw`<!doctype html>
-<html lang="zh-CN">
+<html lang="en-US">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -807,7 +807,7 @@ export const overlayHtml = String.raw`<!doctype html>
         bilibili: document.getElementById('bilibiliState'),
       };
       const maxComments = 40;
-      let currentLanguage = localStorage.getItem('glc-language') || 'zh-CN';
+      let currentLanguage = resolveInitialLanguage();
       let lastStatus;
       let pageConnected = false;
 
@@ -815,7 +815,7 @@ export const overlayHtml = String.raw`<!doctype html>
         button.addEventListener('click', () => switchView(button.dataset.viewTarget));
       });
 
-      languageSelect.value = i18n[currentLanguage] ? currentLanguage : 'zh-CN';
+      languageSelect.value = i18n[currentLanguage] ? currentLanguage : 'en-US';
       currentLanguage = languageSelect.value;
       languageSelect.addEventListener('change', () => {
         currentLanguage = languageSelect.value;
@@ -1026,6 +1026,7 @@ export const overlayHtml = String.raw`<!doctype html>
 
       function applyI18n() {
         document.documentElement.lang = currentLanguage;
+        languageSelect.value = currentLanguage;
         document.querySelectorAll('[data-i18n]').forEach((node) => {
           node.textContent = t(node.dataset.i18n);
         });
@@ -1038,7 +1039,36 @@ export const overlayHtml = String.raw`<!doctype html>
       }
 
       function t(key) {
-        return i18n[currentLanguage]?.[key] || i18n['zh-CN'][key] || key;
+        return i18n[currentLanguage]?.[key] || i18n['en-US'][key] || key;
+      }
+
+      function resolveInitialLanguage() {
+        const savedLanguage = localStorage.getItem('glc-language');
+        if (i18n[savedLanguage]) {
+          return savedLanguage;
+        }
+
+        const browserLanguages = navigator.languages?.length
+          ? navigator.languages
+          : [navigator.language];
+        for (const language of browserLanguages) {
+          const normalized = normalizeLanguage(language);
+          if (normalized) {
+            localStorage.setItem('glc-language', normalized);
+            return normalized;
+          }
+        }
+
+        localStorage.setItem('glc-language', 'en-US');
+        return 'en-US';
+      }
+
+      function normalizeLanguage(language) {
+        const value = String(language || '').toLowerCase();
+        if (value.startsWith('zh')) return 'zh-CN';
+        if (value.startsWith('ja')) return 'ja-JP';
+        if (value.startsWith('en')) return 'en-US';
+        return '';
       }
 
       function escapeHtml(value) {
