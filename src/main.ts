@@ -1,10 +1,12 @@
 import { loadConfig, saveConfig } from './config/config.js';
+import type { AppConfig } from './config/schema.js';
 import { CommentBus } from './core/CommentBus.js';
 import type { LiveComment } from './core/LiveComment.js';
 import { TwitchIrcOutput } from './output/TwitchIrcOutput.js';
 import { BilibiliAdapter } from './platforms/bilibili/BilibiliAdapter.js';
 import { DouyuAdapter } from './platforms/douyu/DouyuAdapter.js';
 import { HuyaAdapter } from './platforms/huya/HuyaAdapter.js';
+import type { PlatformAdapter } from './platforms/PlatformAdapter.js';
 import { TwitchIrcServer } from './twitch/TwitchIrcServer.js';
 import { logger } from './utils/logger.js';
 import { HttpServer } from './web/httpServer.js';
@@ -52,45 +54,19 @@ async function bootstrap(): Promise<void> {
       output: twitchOutput.getStatus(),
       web: httpServer.getStatus(),
       platforms: {
-        douyu: douyuAdapter.getStatus(),
-        huya: config.platforms.huya.enabled || huyaAdapter.getStatus().status !== 'idle'
-          ? huyaAdapter.getStatus()
-          : {
-              name: 'huya',
-              status: 'disabled',
-              roomId: config.platforms.huya.roomId,
-            },
-        bilibili: config.platforms.bilibili.enabled || bilibiliAdapter.getStatus().status !== 'idle'
-          ? bilibiliAdapter.getStatus()
-          : {
-              name: 'bilibili',
-              status: 'disabled',
-              roomId: config.platforms.bilibili.roomId,
-            },
+        douyu: getPlatformStatus(config, 'douyu', douyuAdapter),
+        huya: getPlatformStatus(config, 'huya', huyaAdapter),
+        bilibili: getPlatformStatus(config, 'bilibili', bilibiliAdapter),
       },
       comments: bus.getStats(),
     }),
     publishTestComment: (comment) => {
       bus.publish(createTestComment(config.platforms.douyu.roomId, comment));
     },
-    switchDouyuRoom: async (roomId) => {
-      await douyuAdapter.switchRoom(roomId);
-      config.platforms.douyu.roomId = roomId;
-      config.platforms.douyu.enabled = roomId.trim().length > 0;
-      await saveConfig(config);
-    },
-    switchHuyaRoom: async (roomId) => {
-      await huyaAdapter.switchRoom(roomId);
-      config.platforms.huya.roomId = roomId;
-      config.platforms.huya.enabled = roomId.trim().length > 0;
-      await saveConfig(config);
-    },
-    switchBilibiliRoom: async (roomId) => {
-      await bilibiliAdapter.switchRoom(roomId);
-      config.platforms.bilibili.roomId = roomId;
-      config.platforms.bilibili.enabled = roomId.trim().length > 0;
-      await saveConfig(config);
-    },
+    switchDouyuRoom: async (roomId, enabled) => switchPlatformRoom(config, 'douyu', douyuAdapter, roomId, enabled),
+    switchHuyaRoom: async (roomId, enabled) => switchPlatformRoom(config, 'huya', huyaAdapter, roomId, enabled),
+    switchBilibiliRoom: async (roomId, enabled) =>
+      switchPlatformRoom(config, 'bilibili', bilibiliAdapter, roomId, enabled),
   });
   await httpServer.start();
 
@@ -145,11 +121,55 @@ function createTestComment(roomId: string, input?: Partial<LiveComment>): LiveCo
   return {
     platform: input?.platform ?? 'mock',
     roomId: input?.roomId ?? roomId,
-    username: input?.username ?? '测试用户',
-    content: input?.content ?? '这是一条测试弹幕',
+    username: input?.username ?? 'Test User',
+    content: input?.content ?? 'This is a test comment',
     type: input?.type ?? 'chat',
     timestamp: Date.now(),
   };
+}
+
+function getPlatformStatus(
+  config: AppConfig,
+  platform: keyof AppConfig['platforms'],
+  adapter: PlatformAdapter,
+): ReturnType<PlatformAdapter['getStatus']> & { enabled: boolean } {
+  const platformConfig = config.platforms[platform];
+  if (!platformConfig.enabled) {
+    return {
+      name: platform,
+      status: 'disabled',
+      roomId: platformConfig.roomId,
+      enabled: false,
+    };
+  }
+
+  return {
+    ...adapter.getStatus(),
+    enabled: true,
+  };
+}
+
+async function switchPlatformRoom(
+  config: AppConfig,
+  platform: keyof AppConfig['platforms'],
+  adapter: PlatformAdapter,
+  roomId: string,
+  enabled: boolean | undefined,
+): Promise<void> {
+  const nextRoomId = roomId.trim();
+  const nextEnabled = nextRoomId.length > 0 && (enabled ?? true);
+
+  config.platforms[platform].roomId = nextRoomId;
+  config.platforms[platform].enabled = nextEnabled;
+
+  if (!nextEnabled) {
+    await adapter.disconnect();
+    await saveConfig(config);
+    return;
+  }
+
+  await adapter.switchRoom(nextRoomId);
+  await saveConfig(config);
 }
 
 bootstrap().catch((error) => {

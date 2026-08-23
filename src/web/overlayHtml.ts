@@ -254,6 +254,26 @@ export const overlayHtml = String.raw`<!doctype html>
       .platform-state.error {
         color: var(--red);
       }
+      .platform-room-label {
+        display: block;
+        margin-bottom: 6px;
+      }
+      .toggle-row {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 10px;
+        color: var(--soft);
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .toggle-row input {
+        width: 16px;
+        height: 16px;
+        margin: 0;
+        accent-color: var(--blue);
+      }
       input {
         width: 100%;
         height: 36px;
@@ -447,11 +467,11 @@ export const overlayHtml = String.raw`<!doctype html>
           <div class="logo">GL</div>
           <div class="brand-text">
             <h1 class="brand-title" data-i18n="appName">Game Live Comment</h1>
-            <p class="brand-subtitle" data-i18n="appSubtitle">PS5 弹幕桥接</p>
+            <p class="brand-subtitle" data-i18n="appSubtitle">PS5 comment bridge</p>
           </div>
         </div>
         <label class="language">
-          <span data-i18n="language">语言</span>
+          <span data-i18n="language">Language</span>
           <select id="languageSelect" aria-label="Language">
             <option value="zh-CN">简体中文</option>
             <option value="en-US">English</option>
@@ -462,11 +482,11 @@ export const overlayHtml = String.raw`<!doctype html>
 
       <aside class="sidebar">
         <nav class="nav" aria-label="Main navigation">
-          <button class="nav-button active" type="button" data-view-target="monitor" data-i18n-title="navMonitor" title="弹幕监控"><span class="nav-label" data-i18n="navMonitor">弹幕监控</span></button>
-          <button class="nav-button" type="button" data-view-target="platforms" data-i18n-title="navPlatforms" title="平台配置"><span class="nav-label" data-i18n="navPlatforms">平台配置</span></button>
-          <button class="nav-button" type="button" data-view-target="settings" data-i18n-title="navSettings" title="设置"><span class="nav-label" data-i18n="navSettings">设置</span></button>
-          <button class="nav-button" type="button" data-view-target="system" data-i18n-title="navSystem" title="系统状态"><span class="nav-label" data-i18n="navSystem">系统状态</span></button>
-          <button class="nav-button" type="button" data-view-target="about" data-i18n-title="navAbout" title="关于"><span class="nav-label" data-i18n="navAbout">关于</span></button>
+          <button class="nav-button active" type="button" data-view-target="monitor" data-i18n-title="navMonitor" title="Comments"><span class="nav-label" data-i18n="navMonitor">Comments</span></button>
+          <button class="nav-button" type="button" data-view-target="platforms" data-i18n-title="navPlatforms" title="Platforms"><span class="nav-label" data-i18n="navPlatforms">Platforms</span></button>
+          <button class="nav-button" type="button" data-view-target="settings" data-i18n-title="navSettings" title="Settings"><span class="nav-label" data-i18n="navSettings">Settings</span></button>
+          <button class="nav-button" type="button" data-view-target="system" data-i18n-title="navSystem" title="System"><span class="nav-label" data-i18n="navSystem">System</span></button>
+          <button class="nav-button" type="button" data-view-target="about" data-i18n-title="navAbout" title="About"><span class="nav-label" data-i18n="navAbout">About</span></button>
         </nav>
       </aside>
 
@@ -474,12 +494,12 @@ export const overlayHtml = String.raw`<!doctype html>
         <section id="view-monitor" class="view active">
           <div class="view-header">
             <div>
-              <h2 class="view-title" data-i18n="monitorTitle">弹幕监控</h2>
-              <p class="view-description" data-i18n="monitorDescription">实时查看转发到页面和 PS5 的弹幕，最新消息显示在上方。</p>
+              <h2 class="view-title" data-i18n="monitorTitle">Comments</h2>
+              <p class="view-description" data-i18n="monitorDescription">Watch comments forwarded to the web page and PS5. Newest comments appear at the top.</p>
             </div>
             <div id="status" class="status-pill">
               <span class="dot"></span>
-              <span id="statusText" data-i18n="pageConnecting">页面连接中</span>
+              <span id="statusText" data-i18n="pageConnecting">Page connecting</span>
             </div>
           </div>
           <section id="comments" class="comments"></section>
@@ -488,36 +508,51 @@ export const overlayHtml = String.raw`<!doctype html>
         <section id="view-platforms" class="view">
           <div class="view-header">
             <div>
-              <h2 class="view-title" data-i18n="platformTitle">平台配置</h2>
-              <p class="view-description" data-i18n="platformDescription">填写房间号后保存，留空表示停用对应平台。</p>
+              <h2 class="view-title" data-i18n="platformTitle">Platform Configuration</h2>
+              <p class="view-description" data-i18n="platformDescription">Enter room IDs and save. Leave a field empty to disable that platform.</p>
             </div>
           </div>
           <form id="roomForm">
             <div class="platform-grid">
               <div class="platform-card">
                 <div class="label-row">
-                  <label for="douyuRoom" data-i18n="douyuRoom">斗鱼房间号</label>
+                  <strong data-i18n="platformDouyu">Douyu</strong>
                   <span id="douyuState" class="platform-state"></span>
                 </div>
-                <input id="douyuRoom" name="douyu" autocomplete="off" data-i18n-placeholder="emptyToDisable" placeholder="留空则停用" />
+                <label class="platform-room-label" for="douyuRoom" data-i18n="roomId">Room ID</label>
+                <input id="douyuRoom" name="douyu" autocomplete="off" data-i18n-placeholder="emptyToDisable" placeholder="Leave empty to disable" />
+                <label class="toggle-row" for="douyuEnabled">
+                  <input id="douyuEnabled" name="douyuEnabled" type="checkbox" />
+                  <span data-i18n="enablePlatform">Enabled</span>
+                </label>
               </div>
               <div class="platform-card">
                 <div class="label-row">
-                  <label for="huyaRoom" data-i18n="huyaRoom">虎牙房间号</label>
+                  <strong data-i18n="platformHuya">Huya</strong>
                   <span id="huyaState" class="platform-state"></span>
                 </div>
-                <input id="huyaRoom" name="huya" autocomplete="off" data-i18n-placeholder="emptyToDisable" placeholder="留空则停用" />
+                <label class="platform-room-label" for="huyaRoom" data-i18n="roomId">Room ID</label>
+                <input id="huyaRoom" name="huya" autocomplete="off" data-i18n-placeholder="emptyToDisable" placeholder="Leave empty to disable" />
+                <label class="toggle-row" for="huyaEnabled">
+                  <input id="huyaEnabled" name="huyaEnabled" type="checkbox" />
+                  <span data-i18n="enablePlatform">Enabled</span>
+                </label>
               </div>
               <div class="platform-card">
                 <div class="label-row">
-                  <label for="bilibiliRoom" data-i18n="bilibiliRoom">B站房间号</label>
+                  <strong data-i18n="platformBilibili">Bilibili</strong>
                   <span id="bilibiliState" class="platform-state"></span>
                 </div>
-                <input id="bilibiliRoom" name="bilibili" autocomplete="off" data-i18n-placeholder="emptyToDisable" placeholder="留空则停用" />
+                <label class="platform-room-label" for="bilibiliRoom" data-i18n="roomId">Room ID</label>
+                <input id="bilibiliRoom" name="bilibili" autocomplete="off" data-i18n-placeholder="emptyToDisable" placeholder="Leave empty to disable" />
+                <label class="toggle-row" for="bilibiliEnabled">
+                  <input id="bilibiliEnabled" name="bilibiliEnabled" type="checkbox" />
+                  <span data-i18n="enablePlatform">Enabled</span>
+                </label>
               </div>
             </div>
             <div class="actions" style="margin-top: 12px;">
-              <button id="saveRooms" class="primary-button" type="submit" data-i18n="saveRooms">更新/保存</button>
+              <button id="saveRooms" class="primary-button" type="submit" data-i18n="saveRooms">Update / Save</button>
               <div id="roomMessage" class="message"></div>
             </div>
           </form>
@@ -525,43 +560,43 @@ export const overlayHtml = String.raw`<!doctype html>
 
         <section id="view-settings" class="view">
           <div>
-            <h2 class="view-title" data-i18n="settingsTitle">设置</h2>
-            <p class="view-description" data-i18n="settingsDescription">这里先保留全局设置入口，后续可放弹幕格式、礼物开关和日志级别。</p>
+            <h2 class="view-title" data-i18n="settingsTitle">Settings</h2>
+            <p class="view-description" data-i18n="settingsDescription">Global settings live here. Comment format, gift messages, and log level can be added later.</p>
           </div>
           <div class="info-card">
             <div class="setting-row">
               <div>
-                <strong data-i18n="settingCommentFormat">弹幕格式</strong>
-                <p data-i18n="settingCommentFormatDesc">当前由配置文件控制，后续可改为页面编辑。</p>
+                <strong data-i18n="settingCommentFormat">Comment format</strong>
+                <p data-i18n="settingCommentFormatDesc">Currently controlled by the config file. Page editing can be added later.</p>
               </div>
               <span class="platform-state">[{platform}] {username}: {content}</span>
             </div>
             <div class="setting-row">
               <div>
-                <strong data-i18n="settingGifts">礼物消息</strong>
-                <p data-i18n="settingGiftsDesc">当前由各平台配置控制。</p>
+                <strong data-i18n="settingGifts">Gift messages</strong>
+                <p data-i18n="settingGiftsDesc">Currently controlled by each platform config.</p>
               </div>
-              <span class="platform-state" data-i18n="notEditableYet">暂不可在页面修改</span>
+              <span class="platform-state" data-i18n="notEditableYet">Not editable on this page yet</span>
             </div>
           </div>
         </section>
 
         <section id="view-system" class="view">
           <div>
-            <h2 class="view-title" data-i18n="systemTitle">系统状态</h2>
-            <p class="view-description" data-i18n="systemDescription">查看 Web、PS5/Twitch 模拟服务和平台连接状态。</p>
+            <h2 class="view-title" data-i18n="systemTitle">System Status</h2>
+            <p class="view-description" data-i18n="systemDescription">Check the web, PS5/Twitch emulation, and platform connection state.</p>
           </div>
           <div class="status-grid">
             <div class="info-card">
-              <h3 data-i18n="platformStatus">平台状态</h3>
+              <h3 data-i18n="platformStatus">Platform Status</h3>
               <div id="platformStatusList" class="info-list"></div>
             </div>
             <div class="info-card">
-              <h3 data-i18n="runtimeStatus">运行状态</h3>
+              <h3 data-i18n="runtimeStatus">Runtime Status</h3>
               <div class="info-list">
-                <div class="info-row"><span data-i18n="webClients">Web 客户端</span><strong id="webClients">0</strong></div>
-                <div class="info-row"><span data-i18n="commentsCount">已接收弹幕</span><strong id="commentsCount">0</strong></div>
-                <div class="info-row"><span data-i18n="ps5Clients">PS5 客户端</span><strong id="ps5Clients">0</strong></div>
+                <div class="info-row"><span data-i18n="webClients">Web clients</span><strong id="webClients">0</strong></div>
+                <div class="info-row"><span data-i18n="commentsCount">Received comments</span><strong id="commentsCount">0</strong></div>
+                <div class="info-row"><span data-i18n="ps5Clients">PS5 clients</span><strong id="ps5Clients">0</strong></div>
               </div>
             </div>
           </div>
@@ -569,14 +604,14 @@ export const overlayHtml = String.raw`<!doctype html>
 
         <section id="view-about" class="view">
           <div>
-            <h2 class="view-title" data-i18n="aboutTitle">关于</h2>
-            <p class="view-description" data-i18n="aboutDescription">Game Live Comment 用于将指定直播平台弹幕桥接到 PS5 Twitch 聊天和 Web 页面。</p>
+            <h2 class="view-title" data-i18n="aboutTitle">About</h2>
+            <p class="view-description" data-i18n="aboutDescription">Game Live Comment bridges comments from specified streaming platforms to PS5 Twitch chat and a web page.</p>
           </div>
           <div class="info-card">
             <div class="info-list">
               <div class="info-row"><span>GitHub</span><a href="https://github.com/raykimurayyz/game-live-comment" target="_blank" rel="noreferrer">raykimurayyz/game-live-comment</a></div>
               <div class="info-row"><span>Docker Hub</span><a href="https://hub.docker.com/r/raykimurayyz/gamelivecomment" target="_blank" rel="noreferrer">raykimurayyz/gamelivecomment</a></div>
-              <div class="info-row"><span data-i18n="license">许可</span><strong>MIT</strong></div>
+              <div class="info-row"><span data-i18n="license">License</span><strong>MIT</strong></div>
             </div>
           </div>
         </section>
@@ -613,9 +648,11 @@ export const overlayHtml = String.raw`<!doctype html>
           systemDescription: '查看 Web、PS5/Twitch 模拟服务和平台连接状态。',
           aboutTitle: '关于',
           aboutDescription: 'Game Live Comment 用于将指定直播平台弹幕桥接到 PS5 Twitch 聊天和 Web 页面。',
+          roomId: '房间号',
           douyuRoom: '斗鱼房间号',
           huyaRoom: '虎牙房间号',
           bilibiliRoom: 'B站房间号',
+          enablePlatform: '启用',
           emptyToDisable: '留空则停用',
           saveRooms: '更新/保存',
           pageConnecting: '页面连接中',
@@ -646,6 +683,9 @@ export const overlayHtml = String.raw`<!doctype html>
           notEditableYet: '暂不可在页面修改',
           license: '许可',
           footerText: 'Created by @raykimurayyz',
+          platformDouyu: '斗鱼',
+          platformHuya: '虎牙',
+          platformBilibili: 'B站',
           mock: '测试',
           unknownError: '未知错误',
           roomIdNotConfigured: '房间号未配置',
@@ -676,9 +716,11 @@ export const overlayHtml = String.raw`<!doctype html>
           systemDescription: 'Check the web, PS5/Twitch emulation, and platform connection state.',
           aboutTitle: 'About',
           aboutDescription: 'Game Live Comment bridges comments from specified streaming platforms to PS5 Twitch chat and a web page.',
+          roomId: 'Room ID',
           douyuRoom: 'Douyu room ID',
           huyaRoom: 'Huya room ID',
           bilibiliRoom: 'Bilibili room ID',
+          enablePlatform: 'Enabled',
           emptyToDisable: 'Leave empty to disable',
           saveRooms: 'Update / Save',
           pageConnecting: 'Page connecting',
@@ -709,6 +751,9 @@ export const overlayHtml = String.raw`<!doctype html>
           notEditableYet: 'Not editable on this page yet',
           license: 'License',
           footerText: 'Created by @raykimurayyz',
+          platformDouyu: 'Douyu',
+          platformHuya: 'Huya',
+          platformBilibili: 'Bilibili',
           mock: 'Test',
           unknownError: 'Unknown error',
           roomIdNotConfigured: 'Room ID is not configured',
@@ -739,9 +784,11 @@ export const overlayHtml = String.raw`<!doctype html>
           systemDescription: 'Web、PS5/Twitch エミュレーション、各プラットフォームの接続状態を確認します。',
           aboutTitle: '概要',
           aboutDescription: 'Game Live Comment は指定した配信プラットフォームのコメントを PS5 Twitch チャットと Web ページへ転送します。',
+          roomId: 'ルーム ID',
           douyuRoom: 'Douyu ルーム ID',
           huyaRoom: 'Huya ルーム ID',
           bilibiliRoom: 'Bilibili ルーム ID',
+          enablePlatform: '有効',
           emptyToDisable: '空欄で無効化',
           saveRooms: '更新 / 保存',
           pageConnecting: 'ページ接続中',
@@ -772,6 +819,9 @@ export const overlayHtml = String.raw`<!doctype html>
           notEditableYet: 'このページではまだ編集できません',
           license: 'ライセンス',
           footerText: 'Created by @raykimurayyz',
+          platformDouyu: 'Douyu',
+          platformHuya: 'Huya',
+          platformBilibili: 'Bilibili',
           mock: 'テスト',
           unknownError: '不明なエラー',
           roomIdNotConfigured: 'ルーム ID が未設定です',
@@ -800,6 +850,11 @@ export const overlayHtml = String.raw`<!doctype html>
         douyu: document.getElementById('douyuRoom'),
         huya: document.getElementById('huyaRoom'),
         bilibili: document.getElementById('bilibiliRoom'),
+      };
+      const enabledInputs = {
+        douyu: document.getElementById('douyuEnabled'),
+        huya: document.getElementById('huyaEnabled'),
+        bilibili: document.getElementById('bilibiliEnabled'),
       };
       const platformStates = {
         douyu: document.getElementById('douyuState'),
@@ -845,7 +900,9 @@ export const overlayHtml = String.raw`<!doctype html>
           const status = await fetchJson('/api/status');
           lastStatus = status;
           for (const platform of Object.keys(roomInputs)) {
-            roomInputs[platform].value = status.platforms?.[platform]?.roomId || '';
+            const platformStatus = status.platforms?.[platform];
+            roomInputs[platform].value = platformStatus?.roomId || '';
+            enabledInputs[platform].checked = Boolean(platformStatus?.enabled);
           }
           renderPlatformStates(status.platforms || {});
           renderSystemStatus(status);
@@ -865,15 +922,22 @@ export const overlayHtml = String.raw`<!doctype html>
 
         try {
           for (const platform of Object.keys(roomInputs)) {
+            const roomId = roomInputs[platform].value.trim();
             await fetchJson('/api/platforms/' + platform + '/room', {
               method: 'POST',
               headers: { 'content-type': 'application/json' },
-              body: JSON.stringify({ roomId: roomInputs[platform].value.trim() }),
+              body: JSON.stringify({
+                roomId,
+                enabled: roomId.length > 0 && enabledInputs[platform].checked,
+              }),
             });
           }
 
           const status = await fetchJson('/api/status');
           lastStatus = status;
+          for (const platform of Object.keys(enabledInputs)) {
+            enabledInputs[platform].checked = Boolean(status.platforms?.[platform]?.enabled);
+          }
           renderPlatformStates(status.platforms || {});
           renderSystemStatus(status);
           const summary = Object.keys(roomInputs)
@@ -1018,9 +1082,9 @@ export const overlayHtml = String.raw`<!doctype html>
       }
 
       function platformLabel(platform) {
-        if (platform === 'douyu') return '斗鱼';
-        if (platform === 'huya') return '虎牙';
-        if (platform === 'bilibili') return 'B站';
+        if (platform === 'douyu') return t('platformDouyu');
+        if (platform === 'huya') return t('platformHuya');
+        if (platform === 'bilibili') return t('platformBilibili');
         return t('mock');
       }
 

@@ -6,6 +6,7 @@ export interface PlatformAdapter {
   readonly name: string;
   connect(): Promise<void>;
   disconnect(): Promise<void>;
+  switchRoom(roomId: string): Promise<void>;
   onComment(handler: (comment: LiveComment) => void): void;
   getStatus(): {
     name: string;

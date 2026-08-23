@@ -6,12 +6,12 @@
   },
   "platforms": {
     "douyu": {
-      "enabled": true,
+      "enabled": false,
       "roomId": "",
       "includeGifts": false
     },
     "huya": {
-      "enabled": true,
+      "enabled": false,
       "roomId": "",
       "includeGifts": false
     },

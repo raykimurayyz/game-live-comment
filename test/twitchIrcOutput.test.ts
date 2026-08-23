@@ -33,7 +33,7 @@ describe('TwitchIrcOutput', () => {
 
     vi.advanceTimersByTime(100);
 
-    expect(ircServer.broadcast).toHaveBeenCalledWith('[斗鱼] Alice: hello');
+    expect(ircServer.broadcast).toHaveBeenCalledWith('[Douyu] Alice: hello');
     expect(output.getStatus()).toEqual({ queueLength: 0 });
 
     output.stop();

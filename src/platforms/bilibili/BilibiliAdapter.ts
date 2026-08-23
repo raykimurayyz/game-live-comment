@@ -157,7 +157,7 @@ export class BilibiliAdapter implements PlatformAdapter {
     this.emitComment({
       platform: 'bilibili',
       roomId: this.options.roomId,
-      username: message.info?.[2]?.[1] || 'B站用户',
+      username: message.info?.[2]?.[1] || 'Bilibili User',
       content: message.info?.[1] || '',
       type: 'chat',
       timestamp: Date.now(),
@@ -172,8 +172,8 @@ export class BilibiliAdapter implements PlatformAdapter {
     this.emitComment({
       platform: 'bilibili',
       roomId: this.options.roomId,
-      username: message.data?.uname || 'B站用户',
-      content: `送出礼物 ${message.data?.giftName || ''}${message.data?.num ? ` x${message.data.num}` : ''}`.trim(),
+      username: message.data?.uname || 'Bilibili User',
+      content: `Sent gift ${message.data?.giftName || ''}${message.data?.num ? ` x${message.data.num}` : ''}`.trim(),
       type: 'gift',
       timestamp: Date.now(),
     });
