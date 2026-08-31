@@ -96,6 +96,8 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            APK_CACHE_BUST=${{ github.run_id }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -109,4 +111,4 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           repository: ${{ env.IMAGE_NAME }}
           readme-filepath: .dockerhub-readme.md
-          short-description: Forward live comments from streaming platforms to a PS5 Twitch chat overlay.
+          short-description: Forward live comments from streaming platforms to a PlayStation Twitch chat overlay.
